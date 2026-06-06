@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美安台灣營養保健品 POS</title>
+<style>
+  .icon { display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; flex-shrink:0; }
+  .icon svg { display:block; stroke:currentColor; fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-width:1.5; }
+</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --bg-sec: #f7f7f5;
+    --bg-ter: #f0efe9;
+    --bg-info: #e6f1fb;
+    --bg-danger: #fcebeb;
+    --text: #1a1a1a;
+    --text-sec: #6b6b67;
+    --text-ter: #a0a09a;
+    --text-info: #185fa5;
+    --text-danger: #a32d2d;
+    --border: rgba(0,0,0,0.12);
+    --border-sec: rgba(0,0,0,0.22);
+    --border-primary: rgba(0,0,0,0.35);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-sec: #242422;
+      --bg-ter: #2c2c2a;
+      --bg-info: #0c2a46;
+      --bg-danger: #3a1212;
+      --text: #f0efe9;
+      --text-sec: #a0a09a;
+      --text-ter: #6b6b67;
+      --text-info: #85b7eb;
+      --text-danger: #f09595;
+      --border: rgba(255,255,255,0.1);
+      --border-sec: rgba(255,255,255,0.18);
+      --border-primary: rgba(255,255,255,0.28);
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    background: var(--bg-ter);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-brand h1 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .header-brand span {
+    font-size: 12px;
+    color: var(--text-sec);
+  }
+  .header-time {
+    font-size: 13px;
+    color: var(--text-sec);
+  }
+  .main {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    overflow: hidden;
+  }
+  /* LEFT */
+  .left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg);
+    border-right: 0.5px solid var(--border);
+    overflow: hidden;
+  }
+  .topbar {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--bg-sec);
+    flex-shrink: 0;
+  }
+  .topbar input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+  }
+  .topbar input:focus { border-color: var(--border-primary); }
+  .mode-toggle {
+    display: flex;
+    border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .mt {
+    padding: 7px 12px;
+    font-size: 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-sec);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .15s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .mt.active { background: var(--text); color: var(--bg); }
+
+  /* icon + text 齊中 */
+  .mt, .pt, .clear-btn, .checkout-btn, .close-receipt,
+  .add-cat-btn, .edit-tab, .order-action-btn,
+  .modal-actions button, .cat-del, .member-clear,
+  .rm-btn, .member-del { display:flex; align-items:center; justify-content:center; gap:5px; }
+  .cart-header h3, .edit-panel-header h3 { display:flex; align-items:center; gap:6px; }
+  .member-selector { display:flex; align-items:center; gap:8px; }
+
+  .member-bar {
+    padding: 8px 16px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .member-bar-wrap { position: relative; flex: 1; min-width: 0; }
+  .member-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--bg-sec);
+    transition: all .15s;
+    width: 100%;
+    font-family: inherit;
+  }
+  .member-selector:hover { border-color: var(--border-primary); background: var(--bg); }
+  .member-avatar {
+    width: 26px; height: 26px;
+    min-width: 26px; min-height: 26px;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    background: var(--bg-info); color: var(--text-info);
+    font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .member-avatar.empty { background: var(--bg-ter); color: var(--text-ter); }
+  .member-name { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+  .member-name.empty { color: var(--text-ter); font-weight: 400; }
+  .member-clear { background: none; border: none; color: var(--text-ter); cursor: pointer; padding: 2px; flex-shrink: 0; }
+  .member-clear:hover { color: var(--text-danger); }
+  .member-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--bg); border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md); z-index: 50;
+    box-shadow: 0 4px 20px rgba(0,0,0,.14);
+    max-height: 260px; overflow-y: auto;
+  }
+  .member-dropdown-search { padding: 8px 10px; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+  .member-dropdown-search input {
+    width: 100%; padding: 6px 10px; border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md); background: var(--bg-sec); color: var(--text);
+    font-size: 12px; font-family: inherit; outline: none;
+  }
+  .member-option { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; transition: background .1s; }
+  .member-option:hover { background: var(--bg-sec); }
+  .member-option-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .member-option-sub { font-size: 11px; color: var(--text-sec); }
+  .member-option-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--bg-info); color: var(--text-info); flex-shrink: 0; }
+  .member-option-badge.retail { background: var(--bg-sec); color: var(--text-sec); border: 0.5px solid var(--border-sec); }
+  .no-member-option { padding: 14px; text-align: center; color: var(--text-ter); font-size: 12px; }
+  .member-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 7px; }
+  .member-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 0.5px solid var(--border); border-radius: var(--radius-md);
+    background: var(--bg-sec); cursor: pointer; transition: all .15s;
+  }
+  .member-item:hover { border-color: var(--border-primary); background: var(--bg); }
+  .member-item-info { flex: 1; min-width: 0; }
+  .member-item-name { font-size: 13px; font-weight: 500; }
+  .member-item-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+  .member-item-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--bg-info); color: var(--text-info); flex-shrink: 0; }
+  .member-item-badge.retail { background: var(--bg-sec); color: var(--text-sec); border: 0.5px solid var(--border-sec); }
+  .member-del { background: none; border: none; color: var(--text-ter); cursor: pointer; padding: 2px; font-size: 14px; }
+  .member-del:hover { color: var(--text-danger); }
+  .edit-tabs {
+    display: flex; border-bottom: 0.5px solid var(--border);
+    background: var(--bg-sec); flex-shrink: 0;
+  }
+  .edit-tab {
+    flex: 1; padding: 10px; font-size: 12px; border: none; background: transparent;
+    cursor: pointer; color: var(--text-sec); border-bottom: 2px solid transparent;
+    transition: all .15s; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .edit-tab.active { color: var(--text); border-bottom-color: var(--text); background: var(--bg); }
+  /* order list */
+  .order-list { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+  .order-item {
+    border:0.5px solid var(--border); border-radius:var(--radius-md);
+    background:var(--bg-sec); overflow:hidden;
+  }
+  .order-item-head {
+    display:flex; align-items:center; gap:10px; padding:10px 12px;
+    cursor:pointer; transition:background .12s;
+  }
+  .order-item-head:hover { background:var(--bg-ter); }
+  .order-no { font-size:11px; color:var(--text-ter); }
+  .order-date { font-size:12px; font-weight:500; flex:1; }
+  .order-meta { display:flex; gap:8px; align-items:center; }
+  .order-badge { font-size:10px; padding:2px 7px; border-radius:10px; background:var(--bg-info); color:var(--text-info); }
+  .order-badge.retail { background:var(--bg-sec); color:var(--text-sec); border:0.5px solid var(--border-sec); }
+  .order-total { font-size:13px; font-weight:500; }
+  .order-bv { font-size:11px; color:var(--text-info); }
+  .order-detail {
+    display:none; border-top:0.5px solid var(--border);
+    padding:10px 12px; background:var(--bg);
+  }
+  .order-detail.open { display:block; }
+  .order-detail-item { display:flex; justify-content:space-between; font-size:11.5px; padding:3px 0; border-bottom:0.5px solid var(--border); }
+  .order-detail-item:last-child { border:none; }
+  .order-detail-name { color:var(--text-sec); flex:1; padding-right:8px; }
+  .order-detail-actions { display:flex; gap:6px; margin-top:10px; }
+  .order-action-btn {
+    flex:1; padding:7px; border-radius:var(--radius-md); font-size:12px;
+    border:0.5px solid var(--border-sec); background:transparent;
+    color:var(--text); cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    transition:background .12s;
+  }
+  .order-action-btn:hover { background:var(--bg-sec); }
+  .order-action-btn.danger { color:var(--text-danger); }
+  .order-action-btn.danger:hover { background:var(--bg-danger); }
+  .order-empty { padding:30px; text-align:center; color:var(--text-ter); font-size:13px; line-height:1.8; }
+  .order-footer { padding:10px 12px; border-top:0.5px solid var(--border); display:flex; gap:8px; flex-shrink:0; }
+  .order-stats { display:flex; gap:12px; padding:10px 12px; background:var(--bg-sec); border-bottom:0.5px solid var(--border); flex-shrink:0; }
+  .order-stat { display:flex; flex-direction:column; gap:2px; }
+  .order-stat-label { font-size:10px; color:var(--text-ter); }
+  .order-stat-val { font-size:13px; font-weight:500; }
+  .cats {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    border-bottom: 0.5px solid var(--border);
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .cats::-webkit-scrollbar { display: none; }
+  .cat {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border-sec);
+    background: transparent;
+    color: var(--text-sec);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .cat.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .prods {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 10px;
+    align-content: start;
+    scrollbar-width: thin;
+  }
+  .prod {
+    background: var(--bg-sec);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+  }
+  .prod:hover { border-color: var(--border-primary); background: var(--bg); }
+  .prod:active { transform: scale(.97); }
+  .prod-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--bg-info);
+    color: var(--text-info);
+    align-self: flex-start;
+    font-weight: 500;
+  }
+  .prod-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .prod-sku { font-size: 10px; color: var(--text-ter); }
+  .prod-price { font-size: 13px; font-weight: 500; color: var(--text); }
+  .prod-bv { font-size: 10px; color: var(--text-sec); }
+  .prod-diff { font-size: 10px; color: #2a7a4b; font-weight: 500; }
+  @media (prefers-color-scheme: dark) { .prod-diff { color: #6ecb97; } }
+  .diff-tag { color: #2a7a4b; font-size: 11px; font-weight: 500; }
+  @media (prefers-color-scheme: dark) { .diff-tag { color: #6ecb97; } }
+  .summary-row.diff { color: #2a7a4b; }
+  @media (prefers-color-scheme: dark) { .summary-row.diff { color: #6ecb97; } }
+  .edit-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border: 0.5px solid var(--border-sec);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sec);
+    font-size: 13px;
+  }
+  .edit-btn:hover { color: var(--text); border-color: var(--border-primary); }
+  .edit-mode .prod:hover .edit-btn { display: flex; }
+  .edit-mode .prod { cursor: default; }
+  .edit-mode .prod:active { transform: none; }
+  .add-prod-card {
+    background: transparent;
+    border: 0.5px dashed var(--border-sec);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 110px;
+    color: var(--text-ter);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .add-prod-card:hover { border-color: var(--border-primary); color: var(--text-sec); background: var(--bg-sec); }
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-ter);
+    font-size: 13px;
+  }
+  /* RIGHT */
+  .right {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .cart-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-sec);
+    flex-shrink: 0;
+  }
+  .cart-header h3 { font-size: 14px; font-weight: 500; }
+  .price-toggle {
+    display: flex;
+    border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .pt {
+    padding: 5px 11px;
+    font-size: 11px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-sec);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .pt.active { background: var(--text); color: var(--bg); }
+  .clear-btn {
+    font-size: 12px;
+    color: var(--text-danger);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+  }
+  .clear-btn:hover { background: var(--bg-danger); }
+  .cart-items { flex: 1; overflow-y: auto; scrollbar-width: thin; }
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: var(--text-ter);
+  }
+  .empty i { font-size: 40px; }
+  .empty p { font-size: 13px; text-align: center; line-height: 1.7; }
+  .ci {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 16px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .ci-info { flex: 1; min-width: 0; }
+  .ci-name {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ci-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+  .ci-controls { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+  .qty-btn {
+    width: 24px;
+    height: 24px;
+    border: 0.5px solid var(--border-sec);
+    border-radius: 6px;
+    background: var(--bg-sec);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .12s;
+    flex-shrink: 0;
+    line-height: 1;
+    font-family: inherit;
+  }
+  .qty-btn:hover { background: var(--bg-ter); }
+  .qty { font-size: 13px; font-weight: 500; min-width: 22px; text-align: center; }
+  .ci-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .ci-price { font-size: 13px; font-weight: 500; }
+  .rm-btn { background: none; border: none; color: var(--text-ter); cursor: pointer; padding: 2px; }
+  .rm-btn:hover { color: var(--text-danger); }
+  .cart-footer {
+    border-top: 0.5px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background: var(--bg-sec);
+    flex-shrink: 0;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-sec);
+  }
+  .summary-row.total { font-size: 16px; font-weight: 500; color: var(--text); }
+  .summary-row.bv { color: var(--text-info); }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 2px 0; }
+  .checkout-btn {
+    padding: 12px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .checkout-btn:hover { opacity: .82; }
+  .checkout-btn:disabled { opacity: .35; cursor: not-allowed; }
+  /* Edit right panel */
+  .edit-panel { display: flex; flex-direction: column; height: 100%; }
+  .edit-panel-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-sec);
+    flex-shrink: 0;
+  }
+  .edit-panel-header h3 { font-size: 14px; font-weight: 500; }
+  .edit-panel-header p { font-size: 12px; color: var(--text-sec); margin-top: 3px; }
+  .cat-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 7px; }
+  .cat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-sec);
+    transition: opacity .15s, background .15s;
+    user-select: none;
+  }
+  .cat-item.dragging { opacity: .35; }
+  .cat-item.drag-over { background: var(--bg-info); border-color: var(--text-info); }
+  .cat-grip {
+    cursor: grab;
+    color: var(--text-ter);
+    display: flex;
+    align-items: center;
+    touch-action: none;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+  .cat-grip:active { cursor: grabbing; }
+  .cat-item input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    font-family: inherit;
+    border-bottom: 1px solid transparent;
+    transition: border-color .15s;
+  }
+  .cat-item input:focus { border-bottom-color: var(--border-primary); }
+  .cat-del { background: none; border: none; color: var(--text-ter); cursor: pointer; padding: 2px; font-size: 14px; }
+  .cat-del:hover { color: var(--text-danger); }
+  .add-cat-btn {
+    margin: 0 12px 12px;
+    padding: 9px;
+    border: 0.5px dashed var(--border-sec);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-sec);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .add-cat-btn:hover { border-color: var(--border-primary); color: var(--text); }
+  /* Modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    width: 340px;
+    padding: 22px;
+    border: 0.5px solid var(--border-sec);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.18);
+  }
+  .modal h4 { font-size: 15px; font-weight: 500; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; color: var(--text-sec); font-weight: 500; }
+  .field input, .field select {
+    padding: 8px 11px;
+    border: 0.5px solid var(--border-sec);
+    border-radius: var(--radius-md);
+    background: var(--bg-sec);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--border-primary); background: var(--bg); }
+  .field-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .field-row .field input { min-width: 0; width: 100%; }
+  .field-row .field label { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .modal-actions { display: flex; gap: 8px; }
+  .modal-actions button {
+    flex: 1;
+    padding: 9px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    cursor: pointer;
+    border: 0.5px solid var(--border-sec);
+    background: transparent;
+    color: var(--text);
+    transition: all .15s;
+    font-family: inherit;
+  }
+  .modal-actions button:hover { background: var(--bg-sec); }
+  .modal-actions .primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .modal-actions .primary:hover { opacity: .82; }
+  .modal-actions .danger { color: var(--text-danger); border-color: rgba(163,45,45,0.3); }
+  .modal-actions .danger:hover { background: var(--bg-danger); }
+  /* Receipt */
+  .receipt-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  .receipt {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    width: 310px;
+    padding: 22px;
+    border: 0.5px solid var(--border-sec);
+    box-shadow: 0 8px 40px rgba(0,0,0,.2);
+    position: relative;
+  }
+  .receipt-close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 28px; height: 28px;
+    min-width: 28px; min-height: 28px;
+    padding: 0; line-height: 1;
+    border: 0.5px solid var(--border-sec);
+    border-radius: 50%;
+    background: var(--bg-sec);
+    color: var(--text-sec);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .receipt-close-btn:hover { background: var(--bg-danger); color: var(--text-danger); border-color: var(--border-danger); }
+  .receipt h4 { font-size: 17px; font-weight: 500; text-align: center; margin-bottom: 4px; }
+  .receipt .subtitle { font-size: 12px; color: var(--text-sec); text-align: center; margin-bottom: 18px; }
+  .receipt-items {
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    padding: 10px 0;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .ri { display: flex; justify-content: space-between; font-size: 12px; }
+  .ri-name { color: var(--text-sec); flex: 1; padding-right: 8px; }
+  .receipt-total { display: flex; flex-direction: column; gap: 5px; margin-bottom: 18px; }
+  .rt-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); }
+  .rt-row.big { font-size: 16px; font-weight: 500; color: var(--text); }
+  .close-receipt {
+    width: 100%;
+    padding: 11px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity .2s, transform .2s;
+    z-index: 999;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ic-store" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4"/><path d="M5 21l0 -10.15"/><path d="M19 21l0 -10.15"/><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></symbol>
+  <symbol id="ic-receipt" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"/><path d="M14 8h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5m2 0v1.5m0 -9v1.5"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"/><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"/><path d="M16 5l3 3"/></symbol>
+  <symbol id="ic-cart" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></symbol>
+  <symbol id="ic-user-circle" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855"/></symbol>
+  <symbol id="ic-chevron-down" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></symbol>
+  <symbol id="ic-cash" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/><path d="M14 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 9v-2a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></symbol>
+  <symbol id="ic-folder-plus" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3"/><path d="M16 19h6"/><path d="M19 16v6"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></symbol>
+  <symbol id="ic-user-plus" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M16 19h6"/><path d="M19 16v6"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4"/></symbol>
+  <symbol id="ic-grip" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="19" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="19" r="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="ic-pdf" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4"/><path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6"/><path d="M17 18h2"/><path d="M20 15h-3v6"/><path d="M11 15a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-1v-6h1z"/></symbol>
+  <symbol id="ic-photo" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10"/></symbol><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M14 4l0 4l-6 0l0 -4"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14"/><path d="M5 12l14 0"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 12h6"/><path d="M9 16h6"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></symbol>
+  <symbol id="ic-chevron-right" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6"/></symbol>
+</svg>
+
+<header>
+  <div class="header-brand">
+    <span class="icon" style="width:20px;height:20px"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-store"/></svg></span>
+    <div>
+      <h1>美安台灣營養保健品 POS</h1>
+      <span>Market America Taiwan</span>
+    </div>
+  </div>
+  <div class="header-time" id="clock"></div>
+</header>
+
+<div class="main">
+  <div class="left" id="left-panel">
+    <div class="topbar">
+      <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-search"/></svg></span>
+      <input type="text" id="search" placeholder="搜尋產品名稱或代號..." oninput="filterProds()">
+      <div class="mode-toggle">
+        <button class="mt active" id="pos-mode-btn" onclick="setAppMode('pos')">
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-receipt"/></svg></span>收銀
+        </button>
+        <button class="mt" id="edit-mode-btn" onclick="setAppMode('edit')">
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-edit"/></svg></span>編輯
+        </button>
+      </div>
+    </div>
+    <div class="cats" id="cats"></div>
+    <div class="prods" id="prods"></div>
+  </div>
+
+  <div class="right">
+    <div id="cart-side" style="display:flex;flex-direction:column;height:100%">
+      <div class="member-bar">
+        <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user"/></svg></span>
+        <div class="member-bar-wrap">
+          <button class="member-selector" id="member-selector-btn" onclick="toggleMemberDropdown()">
+            <div class="member-avatar empty" id="member-avatar"><span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user-circle"/></svg></span></div>
+            <span class="member-name empty" id="member-display">選擇會員</span>
+            <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-chevron-down"/></svg></span>
+          </button>
+          <div class="member-dropdown" id="member-dropdown" style="display:none">
+            <div class="member-dropdown-search">
+              <input type="text" id="member-search-input" placeholder="搜尋姓名或電話..." oninput="renderMemberOptions()">
+            </div>
+            <div id="member-options"></div>
+          </div>
+        </div>
+        <button class="member-clear" id="member-clear-btn" onclick="clearMember()" style="display:none" title="清除會員">
+          <span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span>
+        </button>
+      </div>
+      <div class="cart-header">
+        <h3><span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-cart"/></svg></span>購物車</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="price-toggle">
+            <button class="pt active" onclick="setPriceMode('cost')"><span class="icon" style="width:12px;height:12px"><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-store"/></svg></span>超連鎖</button>
+            <button class="pt" onclick="setPriceMode('retail')"><span class="icon" style="width:12px;height:12px"><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user"/></svg></span>零售</button>
+          </div>
+          <button class="clear-btn" onclick="clearCart()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span> 清除</button>
+        </div>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-footer">
+        <div class="summary-row">
+          <span>商品件數</span><span id="item-count">0 件</span>
+        </div>
+        <div class="summary-row bv">
+          <span>累計 BV</span><span id="bv-total">0 BV</span>
+        </div>
+        <div class="summary-row diff">
+          <span>零售價差合計</span><span id="diff-total">NT$0</span>
+        </div>
+        <hr class="divider">
+        <div class="summary-row total">
+          <span>合計</span><span id="grand-total">NT$0</span>
+        </div>
+        <button class="checkout-btn" id="checkout-btn" onclick="checkout()" disabled>
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-cash"/></svg></span>結帳
+        </button>
+      </div>
+    </div>
+
+    <div id="edit-side" style="display:none;height:100%;display:none;flex-direction:column">
+      <div class="edit-tabs">
+        <button class="edit-tab active" id="tab-cat" onclick="setEditTab('cat')">
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-tag"/></svg></span>分類
+        </button>
+        <button class="edit-tab" id="tab-member" onclick="setEditTab('member')">
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-users"/></svg></span>會員
+        </button>
+        <button class="edit-tab" id="tab-orders" onclick="setEditTab('orders')">
+          <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-list"/></svg></span>訂單
+        </button>
+      </div>
+      <div id="panel-cat" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div class="edit-panel-header">
+          <h3><span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-tag"/></svg></span>管理分類</h3>
+          <p>點擊名稱直接修改，右方圖示刪除</p>
+        </div>
+        <div class="cat-list" id="cat-list"></div>
+        <button class="add-cat-btn" onclick="addCat()">
+          <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-folder-plus"/></svg></span> 新增分類
+        </button>
+      </div>
+      <div id="panel-member" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+        <div class="edit-panel-header">
+          <h3><span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-users"/></svg></span>管理會員</h3>
+          <p>點擊會員可編輯，支援超連鎖／零售身分</p>
+        </div>
+        <div class="member-list" id="member-list"></div>
+        <button class="add-cat-btn" onclick="openMemberModal(null)">
+          <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user-plus"/></svg></span> 新增會員
+        </button>
+      </div>
+      <div id="panel-orders" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+        <div class="edit-panel-header">
+          <h3><span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-list"/></svg></span>訂單記錄</h3>
+          <p>完成收款後自動儲存，資料存於本機</p>
+        </div>
+        <div class="order-stats" id="order-stats"></div>
+        <div class="order-list" id="order-list"></div>
+        <div class="order-footer">
+          <button class="order-action-btn danger" onclick="clearAllOrders()" style="flex:none;padding:7px 14px">
+            <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span> 清除所有記錄
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+function ic(id, size) {
+  size = size || 16;
+  return `<span class="icon" style="width:${size}px;height:${size}px"><svg width="${size}" height="${size}" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#${id}"/></svg></span>`;
+}
+
+let CATS = ['Isotonix','Prime','GoTrim','Miracles','保健組合','其他'];
+let PRODUCTS = [
+  {sku:'T13039',name:'愛尚它® 莓果配方粉末（90份）',cat:'Isotonix',bv:46,cost:2015,retail:2825},
+  {sku:'T13000',name:'愛尚它® 葡萄籽・松樹皮・紅酒萃取精華（90份）',cat:'Isotonix',bv:43,cost:2005,retail:2810},
+  {sku:'T13997',name:'愛尚它® 美妍配方粉末（45份）',cat:'Isotonix',bv:43,cost:2180,retail:3055},
+  {sku:'T13061',name:'愛尚它® 紅酒酒粕藍莓葡萄萃取精華（白藜蘆醇）（30份）',cat:'Isotonix',bv:28,cost:1300,retail:1820},
+  {sku:'T13072',name:'愛尚它® 維生素C粉末（45份）',cat:'Isotonix',bv:13,cost:920,retail:1230},
+  {sku:'T13006',name:'愛尚它® 適明配方粉末（30份）',cat:'Isotonix',bv:22,cost:1115,retail:1565},
+  {sku:'T13003',name:'愛尚它® 等滲鈣粉末（90份）',cat:'Isotonix',bv:10,cost:655,retail:920},
+  {sku:'T13081',name:'愛尚它® 固可寧粉末（45份）',cat:'Isotonix',bv:43,cost:2135,retail:2990},
+  {sku:'T13071',name:'愛尚它® 維生素D3（含K2）粉末（30份）',cat:'Isotonix',bv:14,cost:770,retail:1080},
+  {sku:'T13005',name:'愛尚它® 益生消化酵素粉末（90份）',cat:'Isotonix',bv:19,cost:950,retail:1330},
+  {sku:'T13024',name:'愛尚它® 益生消化酵素隨身包（30包）',cat:'Isotonix',bv:20,cost:1035,retail:1450},
+  {sku:'T14505',name:'愛尚它® 紅藻萃取精華粉末（含蝦紅素）隨身包（30包）',cat:'Isotonix',bv:25,cost:1380,retail:1935},
+  {sku:'T13002',name:'愛尚它® 複方維生素B粉末（90份）',cat:'Isotonix',bv:32,cost:1505,retail:2110},
+  {sku:'T13007',name:'愛尚它® 輔酵素Q10粉末（30份）',cat:'Isotonix',bv:31,cost:1500,retail:2100},
+  {sku:'T6702',name:'愛尚它益善™ 舒寧配方粉末（30包）',cat:'Isotonix',bv:23,cost:1356,retail:1985},
+  {sku:'T6701',name:'愛尚它益善™ 女性保健配方粉末（30包）',cat:'Isotonix',bv:42,cost:1895,retail:2655},
+  {sku:'T6703',name:'愛尚它益善™ 活力配方粉末（30包）',cat:'Isotonix',bv:40,cost:1860,retail:2605},
+  {sku:'T13004',name:'愛尚它® 綜合維生素粉末（90份）',cat:'Isotonix',bv:29,cost:1405,retail:1970},
+  {sku:'T14509',name:'OPC-3® 雙層Q心嚼粒（30顆）',cat:'Isotonix',bv:15,cost:900,retail:1300},
+  {sku:'T13984',name:'愛尚它® 倍護康配方粉末（30份）',cat:'Isotonix',bv:24,cost:1145,retail:1605},
+  {sku:'T14140',name:'愛尚它® 樂活蔬果精華粉末（30份）',cat:'Isotonix',bv:25,cost:1320,retail:1850},
+  {sku:'T1055',name:'愛尚它® 等滲鉻粉末（30份）',cat:'Isotonix',bv:20,cost:980,retail:1375},
+  {sku:'T13018',name:'愛尚它® 綜合礦物質粉末（45份）',cat:'Isotonix',bv:23,cost:1140,retail:1600},
+  {sku:'T13986',name:'愛尚它® 鳳梨酵素粉末（45份）',cat:'Isotonix',bv:35,cost:1635,retail:2290},
+  {sku:'T6496',name:'愛尚它® 每日精選組合隨身包（30包）',cat:'Isotonix',bv:40,cost:1945,retail:2725},
+  {sku:'T13064',name:'愛尚它® 孕婦綜合維生素粉末（45份）',cat:'Isotonix',bv:30,cost:1435,retail:2010},
+  {sku:'T13008',name:'愛尚它® 巴西莓配方粉末（45份）',cat:'Isotonix',bv:30,cost:1460,retail:2045},
+  {sku:'T6101',name:'常青配方® 膠囊食品（30份）',cat:'Prime',bv:17,cost:925,retail:1295},
+  {sku:'T13145',name:'Curcuma™ 薑黃膠囊食品（30份）',cat:'Prime',bv:25,cost:1265,retail:1775},
+  {sku:'T1160',name:'維生素C咀嚼錠（60份）',cat:'Prime',bv:5,cost:330,retail:330},
+  {sku:'T13181',name:'Prime™ 女性呵護配方膠囊（30份）',cat:'Prime',bv:20,cost:1170,retail:1640},
+  {sku:'T14506',name:'Prime™ 菸鹼醯胺D-核糖複方凍（30包）',cat:'Prime',bv:25,cost:1295,retail:1815},
+  {sku:'T14500',name:'紅藻精華軟膠囊（含蝦紅素）（30份）',cat:'Prime',bv:24,cost:1180,retail:1655},
+  {sku:'T13273',name:'nutriclean® 先進纖維粉（28份）',cat:'Prime',bv:30,cost:1415,retail:1985},
+  {sku:'T13285',name:'益生十菌錠狀食品（30份）',cat:'Prime',bv:21,cost:1020,retail:1430},
+  {sku:'T1280',name:'蘆薈汁 原味（944毫升）',cat:'Prime',bv:15,cost:800,retail:1120},
+  {sku:'T1282',name:'蘆薈汁 蔓越莓/蘋果口味（944毫升）',cat:'Prime',bv:15,cost:800,retail:1120},
+  {sku:'T1285',name:'蘆薈汁 草莓/奇異果口味（944毫升）',cat:'Prime',bv:15,cost:800,retail:1120},
+  {sku:'T13850',name:'易善™ 魚油含維生素E軟膠囊（60份）',cat:'Prime',bv:31,cost:1495,retail:2095},
+  {sku:'T6704',name:'易善™ 好清欣錠狀食品（60份）',cat:'Prime',bv:29,cost:1385,retail:1940},
+  {sku:'T13097',name:'利思捷錠狀食品（30份）',cat:'Prime',bv:24,cost:1356,retail:1985},
+  {sku:'T13833',name:'GlutaQ 護力優複方錠（30份）',cat:'Prime',bv:25,cost:1470,retail:2060},
+  {sku:'T14508',name:'Prime™ 鎂力錠 120粒（30份）',cat:'Prime',bv:15,cost:750,retail:1050},
+  {sku:'T6580',name:'Prime™ 肌酸牛磺酸粉末（30條包）',cat:'Prime',bv:23,cost:1150,retail:1610},
+  {sku:'T14507',name:'Prime™ 牛初乳粉（含猴頭菇）蘋果口味（30份）',cat:'Prime',bv:25,cost:1270,retail:1780},
+  {sku:'T13158',name:'Prime™ 男性舒護配方錠（30份）',cat:'Prime',bv:28,cost:1290,retail:1810},
+  {sku:'T13200',name:'魔妍膠原蛋白粉（15份）',cat:'Prime',bv:24,cost:1015,retail:1425},
+  {sku:'T13091',name:'黑種草籽油松樹皮萃取物複方膠囊（30份）',cat:'Prime',bv:40,cost:1840,retail:2580},
+  {sku:'T13092',name:'VivoQuin™ 魚油加黑種草籽油複方膠囊（30份）',cat:'Prime',bv:21,cost:1262,retail:1827},
+  {sku:'T13124',name:"ZZZ'S 晚安好眠雙層錠（30份）",cat:'Prime',bv:16,cost:750,retail:1050},
+  {sku:'T6612',name:'全新生活™ 非洲芒果咖啡（15包）',cat:'GoTrim',bv:22,cost:1080,retail:1515},
+  {sku:'T6610',name:'全新生活™ 非洲芒果茶飲（30包）',cat:'GoTrim',bv:20,cost:1120,retail:1570},
+  {sku:'T6624',name:'全新生活™ 辣木葉複方錠（60份）',cat:'GoTrim',bv:22,cost:1355,retail:1900},
+  {sku:'T6461',name:'全新生活™ 舒衡配方錠（含南非醉茄）（30份）',cat:'GoTrim',bv:37,cost:1750,retail:2450},
+  {sku:'T6462',name:'全新生活™ 纖盈錠（60份）',cat:'GoTrim',bv:41,cost:1880,retail:2635},
+  {sku:'T6644',name:'全新生活™ 窈調代謝膠囊（30份）',cat:'GoTrim',bv:25,cost:1482,retail:2143},
+  {sku:'T6407',name:'全新生活™ 綠咖啡豆熱鉻膠囊（60份）',cat:'GoTrim',bv:26,cost:1480,retail:2075},
+  {sku:'T6390',name:'全新生活™ 即享雪克 香草口味（14份）',cat:'GoTrim',bv:10,cost:1175,retail:1645},
+  {sku:'T6391',name:'全新生活™ 即享雪克 巧克力口味（14份）',cat:'GoTrim',bv:10,cost:1175,retail:1645},
+  {sku:'T6640',name:'Tower+™ 303乳清蛋白肌酸粉末 法式香草（30份）',cat:'GoTrim',bv:20,cost:2740,retail:3840},
+  {sku:'T6942',name:'愛的奇蹟™ 兒童倍護康粉末（30份）',cat:'Miracles',bv:10,cost:650,retail:910},
+  {sku:'T6902',name:'愛的奇蹟™ 兒童益生菌嚼片（30份）',cat:'Miracles',bv:18,cost:940,retail:1320},
+  {sku:'T6936',name:'愛的奇蹟™ 兒童多維素粉末（45份）',cat:'Miracles',bv:13,cost:900,retail:1260},
+  {sku:'T10VDC',name:'循亦暢保健組合（葡萄籽＋薑黃）',cat:'保健組合',bv:68,cost:3270,retail:4585},
+  {sku:'T140JMK',name:'行動力保健組合（鳳梨酵素＋固可寧＋魚油）',cat:'保健組合',bv:88,cost:5000,retail:7000},
+  {sku:'T130DHK',name:'消化保健組合（消化酵素＋益生十菌＋纖維粉）',cat:'保健組合',bv:57,cost:3215,retail:4505},
+  {sku:'T6578',name:'優適保健組合（適明配方＋紅藻精華）',cat:'保健組合',bv:40,cost:2180,retail:3055},
+  {sku:'T6459',name:'愛尚它® 每日精選營養組合（葡萄籽＋B群＋鈣＋綜合維生素）',cat:'保健組合',bv:100,cost:5320,retail:7465},
+  {sku:'T6103',name:'薑黃常青保健組合（常青＋薑黃）',cat:'保健組合',bv:40,cost:2080,retail:2915},
+  {sku:'T14512',name:'Chucho百歲養生套組（每日精選＋鎂力＋複方凍＋魚油）',cat:'保健組合',bv:111,cost:5485,retail:7685},
+  {sku:'T14515',name:'日活夜寧雙件組（D3＋鎂力錠）',cat:'保健組合',bv:20,cost:1215,retail:1700},
+  {sku:'T14517',name:'D3雙重鎂力三件組（D3＋鎂力＋鎂噴霧）',cat:'保健組合',bv:28,cost:1675,retail:2345},
+  {sku:'T68C3H',name:'超給力保健三重奏2.0（複方凍＋葡萄籽＋消化酵素）',cat:'保健組合',bv:75,cost:3820,retail:5350},
+  {sku:'T6475',name:'活力保健組合（綜合維他命＋B群＋魚油）',cat:'保健組合',bv:69,cost:4180,retail:5865},
+  {sku:'T13015',name:'全新生活™ 新陳代謝組合（B群＋巴西莓）',cat:'保健組合',bv:52,cost:2815,retail:3945},
+  {sku:'T30DAY',name:'全新生活™ 30天啟動窈窕組合',cat:'保健組合',bv:70,cost:6450,retail:9035},
+  {sku:'T6392',name:'全新生活™ 窈窕挑戰組合（纖盈＋雪克）',cat:'保健組合',bv:50,cost:4015,retail:5625},
+  {sku:'T6362',name:'全新生活™ 持續窈窕組合（每日精選＋茶飲＋巧克力雪克）',cat:'保健組合',bv:65,cost:4025,retail:5640},
+  {sku:'T6364',name:'全新生活™ 持續窈窕組合（每日精選＋茶飲＋香草雪克）',cat:'保健組合',bv:65,cost:4025,retail:5640},
+  {sku:'T6366',name:'全新生活™ 持續窈窕組合（每日精選＋茶飲＋雙口味雪克）',cat:'保健組合',bv:73,cost:5140,retail:7205},
+  {sku:'T6482',name:'全新生活™ 體內環保組（常青＋纖維粉＋蘆薈汁）',cat:'保健組合',bv:54,cost:2980,retail:4180},
+];
+
+let cart = [];
+let priceMode = 'cost';
+let activeCat = '全部';
+let appMode = 'pos';
+let editTab = 'cat';
+let selectedMember = null;
+let MEMBERS = [];
+
+function getAllCats() { return ['全部', ...CATS]; }
+
+function clockTick() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleDateString('zh-TW', {year:'numeric',month:'2-digit',day:'2-digit'}) + '　' +
+    now.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(clockTick, 1000);
+clockTick();
+
+function setAppMode(m) {
+  appMode = m;
+  document.getElementById('pos-mode-btn').classList.toggle('active', m === 'pos');
+  document.getElementById('edit-mode-btn').classList.toggle('active', m === 'edit');
+  document.getElementById('cart-side').style.display = m === 'pos' ? 'flex' : 'none';
+  const editSide = document.getElementById('edit-side');
+  editSide.style.display = m === 'edit' ? 'flex' : 'none';
+  editSide.style.flexDirection = 'column';
+  document.getElementById('prods').classList.toggle('edit-mode', m === 'edit');
+  if (m === 'edit') { renderCatEditor(); renderMemberList(); }
+  filterProds();
+}
+
+function setEditTab(t) {
+  editTab = t;
+  ['cat','member','orders'].forEach(id => {
+    document.getElementById('tab-' + id).classList.toggle('active', t === id);
+    const panel = document.getElementById('panel-' + id);
+    panel.style.display = t === id ? 'flex' : 'none';
+  });
+  if (t === 'orders') renderOrderList();
+}
+
+function setPriceMode(m) {
+  priceMode = m;
+  document.querySelectorAll('.pt').forEach((b, i) => {
+    b.classList.toggle('active', (i===0&&m==='cost')||(i===1&&m==='retail'));
+  });
+  filterProds(); renderCart();
+}
+
+function renderCats() {
+  const el = document.getElementById('cats');
+  el.innerHTML = '';
+  getAllCats().forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cat' + (c === activeCat ? ' active' : '');
+    btn.textContent = c;
+    btn.onclick = () => { activeCat = c; renderCats(); filterProds(); };
+    el.appendChild(btn);
+  });
+}
+
+function filterProds() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = PRODUCTS.filter(p => {
+    const catOk = activeCat === '全部' || p.cat === activeCat;
+    const qOk = !q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+  const el = document.getElementById('prods');
+  el.innerHTML = '';
+  if (!filtered.length) {
+    el.innerHTML = '<div class="no-results">找不到符合的產品</div>';
+  }
+  filtered.forEach(p => {
+    const price = priceMode === 'cost' ? p.cost : p.retail;
+    const div = document.createElement('div');
+    div.className = 'prod';
+    div.innerHTML = `
+      <button class="edit-btn" onclick="event.stopPropagation();openEditModal('${p.sku}')" title="編輯">
+        <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-edit"/></svg></span>
+      </button>
+      <span class="prod-badge">${p.cat.split('/')[0]}</span>
+      <span class="prod-name">${p.name}</span>
+      <span class="prod-sku">${p.sku}</span>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:4px">
+        <span class="prod-price">NT$${price.toLocaleString()}</span>
+        <span class="prod-diff">+${(p.retail - p.cost).toLocaleString()}</span>
+      </div>
+      <span class="prod-bv">BV ${p.bv} · 零售 NT$${p.retail.toLocaleString()}</span>
+    `;
+    if (appMode === 'pos') div.onclick = () => addToCart(p);
+    el.appendChild(div);
+  });
+  if (appMode === 'edit') {
+    const add = document.createElement('button');
+    add.className = 'add-prod-card';
+    add.innerHTML = '<span class="icon" style="width:22px;height:22px"><svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-plus"/></svg></span><span style="font-size:12px">新增產品</span>';
+    add.onclick = () => openNewModal();
+    el.appendChild(add);
+  }
+}
+
+function renderCatEditor() {
+  const el = document.getElementById('cat-list');
+  el.innerHTML = '';
+
+  let dragSrc = null;
+
+  CATS.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'cat-item';
+    div.dataset.idx = String(i);
+    div.innerHTML = `
+      <span class="cat-grip" data-drag="true" title="拖曳排序">
+        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-grip"/></svg>
+      </span>
+      <input value="${c}" placeholder="分類名稱">
+      <button class="cat-del" title="刪除分類">
+        <span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span>
+      </button>
+    `;
+
+    const grip = div.querySelector('[data-drag]');
+    const input = div.querySelector('input');
+    const delBtn = div.querySelector('.cat-del');
+
+    input.addEventListener('change', () => renameCat(parseInt(div.dataset.idx), input.value));
+    delBtn.addEventListener('click', () => deleteCat(parseInt(div.dataset.idx)));
+
+    /* ── Desktop: 僅握把啟動拖曳 ── */
+    grip.addEventListener('mousedown', () => { div.draggable = true; });
+    div.addEventListener('dragstart', e => {
+      dragSrc = div;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', div.dataset.idx);
+      requestAnimationFrame(() => div.classList.add('dragging'));
+    });
+    div.addEventListener('dragend', () => {
+      div.draggable = false;
+      div.classList.remove('dragging');
+      el.querySelectorAll('.cat-item').forEach(d => d.classList.remove('drag-over'));
+    });
+    div.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (div !== dragSrc) {
+        el.querySelectorAll('.cat-item').forEach(d => d.classList.remove('drag-over'));
+        div.classList.add('drag-over');
+      }
+    });
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      if (!dragSrc || dragSrc === div) return;
+      const from = parseInt(dragSrc.dataset.idx);
+      const to   = parseInt(div.dataset.idx);
+      moveCat(from, to);
+    });
+
+    /* ── Touch: 握把長按啟動，手指滑動排序 ── */
+    let pressTimer = null;
+    let touching = false;
+    let ghost = null;
+
+    grip.addEventListener('touchstart', e => {
+      pressTimer = setTimeout(() => {
+        touching = true;
+        navigator.vibrate && navigator.vibrate(25);
+        div.classList.add('dragging');
+        ghost = div.cloneNode(true);
+        ghost.style.cssText = `position:fixed;opacity:.7;pointer-events:none;width:${div.offsetWidth}px;z-index:9999;border-radius:var(--radius-md);background:var(--bg);border:1px solid var(--text-info);`;
+        document.body.appendChild(ghost);
+      }, 400);
+    }, { passive: true });
+
+    grip.addEventListener('touchmove', e => {
+      if (!touching) { clearTimeout(pressTimer); return; }
+      e.preventDefault();
+      const t = e.touches[0];
+      if (ghost) {
+        ghost.style.left = (t.clientX - div.offsetWidth / 2) + 'px';
+        ghost.style.top  = (t.clientY - div.offsetHeight / 2) + 'px';
+      }
+      el.querySelectorAll('.cat-item').forEach(d => d.classList.remove('drag-over'));
+      const items = [...el.querySelectorAll('.cat-item:not(.dragging)')];
+      for (const item of items) {
+        const r = item.getBoundingClientRect();
+        if (t.clientY >= r.top && t.clientY < r.bottom) {
+          item.classList.add('drag-over'); break;
+        }
+      }
+    }, { passive: false });
+
+    grip.addEventListener('touchend', e => {
+      clearTimeout(pressTimer);
+      if (ghost) { ghost.remove(); ghost = null; }
+      if (!touching) return;
+      touching = false;
+      div.classList.remove('dragging');
+      el.querySelectorAll('.cat-item').forEach(d => d.classList.remove('drag-over'));
+      const t = e.changedTouches[0];
+      const items = [...el.querySelectorAll('.cat-item')];
+      let targetDiv = null;
+      for (const item of items) {
+        const r = item.getBoundingClientRect();
+        if (t.clientY >= r.top && t.clientY < r.bottom) { targetDiv = item; break; }
+      }
+      if (targetDiv && targetDiv !== div) {
+        moveCat(parseInt(div.dataset.idx), parseInt(targetDiv.dataset.idx));
+      }
+    });
+
+    el.appendChild(div);
+  });
+}
+
+function moveCat(from, to) {
+  const item = CATS.splice(from, 1)[0];
+  CATS.splice(to, 0, item);
+  renderCats();
+  renderCatEditor();
+}
+
+function renameCat(idx, newName) {
+  if (!newName.trim()) return;
+  const old = CATS[idx];
+  CATS[idx] = newName.trim();
+  PRODUCTS.forEach(p => { if (p.cat === old) p.cat = newName.trim(); });
+  if (activeCat === old) activeCat = newName.trim();
+  renderCats(); renderCatEditor();
+}
+
+function deleteCat(idx) {
+  const name = CATS[idx];
+  const count = PRODUCTS.filter(p => p.cat === name).length;
+  const msg = count > 0
+    ? `「${name}」分類下有 ${count} 件產品，刪除後將歸入「未分類」。確定刪除？`
+    : `確定刪除「${name}」分類？`;
+  showConfirm(msg, () => {
+    PRODUCTS.forEach(p => { if (p.cat === name) p.cat = '未分類'; });
+    CATS.splice(idx, 1);
+    if (!CATS.includes('未分類') && PRODUCTS.some(p => p.cat === '未分類')) CATS.push('未分類');
+    if (activeCat === name) activeCat = '全部';
+    renderCats(); renderCatEditor(); filterProds();
+  });
+}
+
+function addCat() {
+  removeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.onclick = e => { if (e.target === overlay) removeModal(); };
+  overlay.innerHTML = `
+    <div class="modal" style="width:280px">
+      <h4>新增分類</h4>
+      <div class="field">
+        <label>分類名稱</label>
+        <input id="new-cat-input" placeholder="例：促銷商品" maxlength="20">
+      </div>
+      <div class="modal-actions">
+        <button onclick="removeModal()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span> 取消</button>
+        <button class="primary" onclick="confirmAddCat()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-plus"/></svg></span> 新增</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('new-cat-input')?.focus(), 50);
+  document.getElementById('new-cat-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmAddCat();
+    if (e.key === 'Escape') removeModal();
+  });
+}
+
+function confirmAddCat() {
+  const input = document.getElementById('new-cat-input');
+  const name = input?.value.trim();
+  if (!name) { input?.focus(); return; }
+  if (CATS.includes(name)) {
+    input.style.borderColor = 'var(--text-danger)';
+    input.placeholder = '分類名稱已存在';
+    input.value = '';
+    input.focus();
+    return;
+  }
+  CATS.push(name);
+  removeModal();
+  renderCats(); renderCatEditor();
+}
+
+function openEditModal(sku) {
+  const p = PRODUCTS.find(x => x.sku === sku);
+  if (!p) return;
+  showModal(p, false);
+}
+
+function openNewModal() { showModal(null, true); }
+
+function showModal(p, isNew) {
+  removeModal();
+  const catOptions = CATS.map(c => `<option value="${c}" ${p&&p.cat===c?'selected':''}>${c}</option>`).join('');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.onclick = e => { if (e.target === overlay) removeModal(); };
+  overlay.innerHTML = `
+    <div class="modal">
+      <h4>${isNew ? '新增產品' : '編輯產品'}</h4>
+      <div class="field">
+        <label>產品代號（SKU）</label>
+        <input id="m-sku" value="${p?p.sku:''}" placeholder="例：T13039" ${!isNew?'readonly style="opacity:.5"':''}>
+      </div>
+      <div class="field">
+        <label>產品名稱</label>
+        <input id="m-name" value="${p?p.name:''}" placeholder="輸入產品名稱">
+      </div>
+      <div class="field">
+        <label>所屬分類</label>
+        <select id="m-cat">${catOptions}</select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>BV 點數</label>
+          <input id="m-bv" type="number" value="${p?p.bv:0}" min="0">
+        </div>
+        <div class="field">
+          <label>超連鎖成本價</label>
+          <input id="m-cost" type="number" value="${p?p.cost:0}" min="0">
+        </div>
+        <div class="field">
+          <label>零售價格</label>
+          <input id="m-retail" type="number" value="${p?p.retail:0}" min="0">
+        </div>
+      </div>
+      <div class="modal-actions">
+        ${!isNew ? `<button class="danger" onclick="deleteProduct('${p.sku}')"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span> 刪除</button>` : ''}
+        <button onclick="removeModal()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span> 取消</button>
+        <button class="primary" onclick="${isNew?'saveNewProduct()':'saveProduct(\''+p.sku+'\')'}">${isNew?'<span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-plus"/></svg></span> 新增':'<span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-save"/></svg></span> 儲存'}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function saveProduct(sku) {
+  const p = PRODUCTS.find(x => x.sku === sku);
+  if (!p) return;
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { showToast('請填寫產品名稱'); return; }
+  p.name = name;
+  p.cat = document.getElementById('m-cat').value;
+  p.bv = parseInt(document.getElementById('m-bv').value) || 0;
+  p.cost = parseInt(document.getElementById('m-cost').value) || 0;
+  p.retail = parseInt(document.getElementById('m-retail').value) || 0;
+  removeModal();
+  renderCats(); filterProds(); renderCart();
+}
+
+function saveNewProduct() {
+  const sku = document.getElementById('m-sku').value.trim();
+  const name = document.getElementById('m-name').value.trim();
+  if (!sku || !name) { showToast('請填寫產品代號和名稱'); return; }
+  if (PRODUCTS.find(p => p.sku === sku)) { showToast('產品代號已存在'); return; }
+  PRODUCTS.push({
+    sku, name,
+    cat: document.getElementById('m-cat').value,
+    bv: parseInt(document.getElementById('m-bv').value) || 0,
+    cost: parseInt(document.getElementById('m-cost').value) || 0,
+    retail: parseInt(document.getElementById('m-retail').value) || 0,
+  });
+  removeModal();
+  renderCats(); filterProds();
+}
+
+function deleteProduct(sku) {
+  showConfirm('確定要刪除這個產品？', () => {
+    PRODUCTS = PRODUCTS.filter(p => p.sku !== sku);
+    cart = cart.filter(i => i.sku !== sku);
+    removeModal();
+    renderCats(); filterProds(); renderCart();
+  });
+}
+
+function removeModal() {
+  const m = document.querySelector('.modal-bg');
+  if (m) m.remove();
+}
+
+function showConfirm(msg, onOk) {
+  removeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.innerHTML = `
+    <div class="modal" style="width:300px;gap:16px">
+      <p style="font-size:13px;line-height:1.6;color:var(--text)">${msg}</p>
+      <div class="modal-actions">
+        <button onclick="removeModal()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span> 取消</button>
+        <button class="danger" id="confirm-ok-btn">確定刪除</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('confirm-ok-btn').onclick = () => { removeModal(); onOk(); };
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2200);
+}
+
+/* ── Member functions ── */
+function toggleMemberDropdown() {
+  const dd = document.getElementById('member-dropdown');
+  const isOpen = dd.style.display !== 'none';
+  if (isOpen) { closeMemberDropdown(); return; }
+  document.getElementById('member-search-input').value = '';
+  renderMemberOptions();
+  dd.style.display = 'block';
+  setTimeout(() => document.addEventListener('click', outsideDropdownClick), 0);
+}
+
+function outsideDropdownClick(e) {
+  const wrap = document.querySelector('.member-bar-wrap');
+  if (!wrap.contains(e.target)) {
+    closeMemberDropdown();
+    document.removeEventListener('click', outsideDropdownClick);
+  }
+}
+
+function closeMemberDropdown() {
+  document.getElementById('member-dropdown').style.display = 'none';
+}
+
+function renderMemberOptions() {
+  const q = document.getElementById('member-search-input').value.toLowerCase();
+  const el = document.getElementById('member-options');
+  const filtered = MEMBERS.filter(m =>
+    !q || m.name.toLowerCase().includes(q) || m.phone.includes(q) || m.id.toLowerCase().includes(q)
+  );
+  el.innerHTML = '';
+  if (!filtered.length) {
+    el.innerHTML = '<div class="no-member-option">找不到符合的會員</div>';
+    return;
+  }
+  filtered.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'member-option';
+    const initials = m.name.slice(-2);
+    const badgeClass = m.type === 'retail' ? 'member-option-badge retail' : 'member-option-badge';
+    div.innerHTML = `
+      <div class="member-avatar" style="${m.type==='retail'?'background:var(--bg-sec);color:var(--text-sec)':''}">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="member-option-name">${m.name}</div>
+        <div class="member-option-sub">${m.phone}${m.note?' · '+m.note:''}</div>
+      </div>
+      <span class="${badgeClass}">${m.type==='cost'?'超連鎖':'零售'}</span>
+    `;
+    div.onclick = () => selectMember(m);
+    el.appendChild(div);
+  });
+}
+
+function selectMember(m) {
+  selectedMember = m;
+  const initials = m.name.slice(-2);
+  const avatarEl = document.getElementById('member-avatar');
+  const nameEl = document.getElementById('member-display');
+  avatarEl.className = 'member-avatar';
+  avatarEl.textContent = initials;
+  if (m.type === 'retail') { avatarEl.style.background = 'var(--bg-sec)'; avatarEl.style.color = 'var(--text-sec)'; }
+  else { avatarEl.style.background = ''; avatarEl.style.color = ''; }
+  nameEl.className = 'member-name';
+  nameEl.textContent = m.name + '　' + (m.type==='cost'?'超連鎖':'零售');
+  document.getElementById('member-clear-btn').style.display = 'block';
+  setPriceMode(m.type);
+  closeMemberDropdown();
+}
+
+function clearMember() {
+  selectedMember = null;
+  const avatarEl = document.getElementById('member-avatar');
+  avatarEl.className = 'member-avatar empty';
+  avatarEl.innerHTML = '<span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user-circle"/></svg></span>';
+  avatarEl.style.background = ''; avatarEl.style.color = '';
+  document.getElementById('member-display').className = 'member-name empty';
+  document.getElementById('member-display').textContent = '選擇會員';
+  document.getElementById('member-clear-btn').style.display = 'none';
+}
+
+function renderMemberList() {
+  const el = document.getElementById('member-list');
+  el.innerHTML = '';
+  if (!MEMBERS.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-ter);font-size:13px">尚無會員，點下方新增</div>';
+    return;
+  }
+  MEMBERS.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'member-item';
+    const initials = m.name.slice(-2);
+    const badgeClass = m.type === 'retail' ? 'member-item-badge retail' : 'member-item-badge';
+    div.innerHTML = `
+      <div class="member-avatar" style="width:32px;height:32px;font-size:12px;${m.type==='retail'?'background:var(--bg-sec);color:var(--text-sec)':''}">${initials}</div>
+      <div class="member-item-info">
+        <div class="member-item-name">${m.name}</div>
+        <div class="member-item-sub">${m.id} · ${m.phone}${m.note?' · '+m.note:''}</div>
+      </div>
+      <span class="${badgeClass}">${m.type==='cost'?'超連鎖':'零售'}</span>
+      <button class="member-del" onclick="event.stopPropagation();deleteMember('${m.id}')" title="刪除"><span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span></button>
+    `;
+    div.onclick = () => openMemberModal(m);
+    el.appendChild(div);
+  });
+}
+
+function openMemberModal(m) {
+  removeModal();
+  const isNew = !m;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.onclick = e => { if (e.target === overlay) removeModal(); };
+  overlay.innerHTML = `
+    <div class="modal">
+      <h4>${isNew ? '新增會員' : '編輯會員'}</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field">
+          <label>會員編號</label>
+          <input id="mb-id" value="${m?m.id:''}" placeholder="例：M004" ${!isNew?'readonly style="opacity:.5"':''}>
+        </div>
+        <div class="field">
+          <label>身分</label>
+          <select id="mb-type">
+            <option value="cost" ${m&&m.type==='cost'?'selected':''}>超連鎖</option>
+            <option value="retail" ${m&&m.type==='retail'?'selected':''}>零售</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>姓名</label>
+        <input id="mb-name" value="${m?m.name:''}" placeholder="輸入姓名">
+      </div>
+      <div class="field">
+        <label>電話</label>
+        <input id="mb-phone" value="${m?m.phone:''}" placeholder="例：0912-345-678">
+      </div>
+      <div class="field">
+        <label>備註</label>
+        <input id="mb-note" value="${m?m.note:''}" placeholder="選填">
+      </div>
+      <div class="modal-actions">
+        ${!isNew ? `<button class="danger" onclick="deleteMember('${m.id}',true)"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span> 刪除</button>` : ''}
+        <button onclick="removeModal()"><span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span> 取消</button>
+        <button class="primary" onclick="${isNew?'saveMemberNew()':'saveMember(\''+m.id+'\')'}">${isNew?'<span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-user-plus"/></svg></span> 新增':'<span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-save"/></svg></span> 儲存'}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function saveMember(id) {
+  const m = MEMBERS.find(x => x.id === id);
+  if (!m) return;
+  const name = document.getElementById('mb-name').value.trim();
+  if (!name) { showToast('請填寫姓名'); return; }
+  m.name = name;
+  m.phone = document.getElementById('mb-phone').value.trim();
+  m.type = document.getElementById('mb-type').value;
+  m.note = document.getElementById('mb-note').value.trim();
+  if (selectedMember && selectedMember.id === id) selectMember(m);
+  removeModal(); renderMemberList();
+}
+
+function saveMemberNew() {
+  const id = document.getElementById('mb-id').value.trim();
+  const name = document.getElementById('mb-name').value.trim();
+  if (!id || !name) { showToast('請填寫會員編號和姓名'); return; }
+  if (MEMBERS.find(m => m.id === id)) { showToast('會員編號已存在'); return; }
+  MEMBERS.push({ id, name, phone: document.getElementById('mb-phone').value.trim(), type: document.getElementById('mb-type').value, note: document.getElementById('mb-note').value.trim() });
+  removeModal(); renderMemberList();
+}
+
+function deleteMember(id, fromModal) {
+  showConfirm('確定要刪除此會員？', () => {
+    MEMBERS = MEMBERS.filter(m => m.id !== id);
+    if (selectedMember && selectedMember.id === id) clearMember();
+    removeModal();
+    renderMemberList();
+  });
+}
+
+function addToCart(p) {
+  if (appMode !== 'pos') return;
+  const ex = cart.find(i => i.sku === p.sku);
+  if (ex) { ex.qty++; } else { cart.push({...p, qty:1}); }
+  renderCart();
+}
+
+function changeQty(sku, d) {
+  const item = cart.find(i => i.sku === sku);
+  if (!item) return;
+  item.qty += d;
+  if (item.qty <= 0) cart = cart.filter(i => i.sku !== sku);
+  renderCart();
+}
+
+function removeItem(sku) { cart = cart.filter(i => i.sku !== sku); renderCart(); }
+function clearCart() { cart = []; renderCart(); }
+
+function renderCart() {
+  const el = document.getElementById('cart-items');
+  if (!cart.length) {
+    el.innerHTML = `<div class="empty"><span class="icon" style="width:16px;height:16px"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-cart"/></svg></span><p>點擊左側產品<br>加入購物車</p></div>`;
+    document.getElementById('checkout-btn').disabled = true;
+    document.getElementById('item-count').textContent = '0 件';
+    document.getElementById('bv-total').textContent = '0 BV';
+    document.getElementById('diff-total').textContent = 'NT$0';
+    document.getElementById('grand-total').textContent = 'NT$0';
+    return;
+  }
+  document.getElementById('checkout-btn').disabled = false;
+  let bv = 0, total = 0, items = 0, totalDiff = 0;
+  el.innerHTML = '';
+  cart.forEach(item => {
+    const price = priceMode === 'cost' ? item.cost : item.retail;
+    const line = price * item.qty;
+    const lineDiff = (item.retail - item.cost) * item.qty;
+    bv += item.bv * item.qty; total += line; items += item.qty; totalDiff += lineDiff;
+    const div = document.createElement('div');
+    div.className = 'ci';
+    div.innerHTML = `
+      <div class="ci-info">
+        <div class="ci-name" title="${item.name}">${item.name}</div>
+        <div class="ci-sub">${item.sku} · BV ${item.bv} × ${item.qty}</div>
+        <div class="ci-controls">
+          <button class="qty-btn" onclick="changeQty('${item.sku}',-1)">−</button>
+          <span class="qty">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${item.sku}',1)">+</button>
+        </div>
+      </div>
+      <div class="ci-right">
+        <button class="rm-btn" onclick="removeItem('${item.sku}')" title="移除">
+          <span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-x"/></svg></span>
+        </button>
+        <span class="ci-price">NT$${line.toLocaleString()}</span>
+        <span class="diff-tag">+${lineDiff.toLocaleString()}</span>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+  document.getElementById('item-count').textContent = items + ' 件';
+  document.getElementById('bv-total').textContent = bv + ' BV';
+  document.getElementById('diff-total').textContent = 'NT$' + totalDiff.toLocaleString();
+  document.getElementById('grand-total').textContent = 'NT$' + total.toLocaleString();
+}
+
+function checkout() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-TW') + ' ' + now.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'});
+  let bv = 0, total = 0, totalDiff = 0;
+  const orderNo = 'ORD-' + Date.now().toString().slice(-6);
+  const snapshot = cart.map(item => {
+    const price = priceMode === 'cost' ? item.cost : item.retail;
+    const line = price * item.qty;
+    const diff = (item.retail - item.cost) * item.qty;
+    bv += item.bv * item.qty; total += line; totalDiff += diff;
+    return { ...item, price, line, diff };
+  });
+  const memberLine = selectedMember
+    ? `<div class="rt-row"><span>會員</span><span>${selectedMember.name}（${selectedMember.type==='cost'?'超連鎖':'零售'}）</span></div>`
+    : '';
+  const itemsHTML = snapshot.map(item =>
+    `<div class="ri"><span class="ri-name">${item.name.substring(0,22)}${item.name.length>22?'…':''} ×${item.qty}</span><span>NT$${item.line.toLocaleString()}</span></div>`
+  ).join('');
+  const overlay = document.createElement('div');
+  overlay.className = 'receipt-overlay';
+  overlay.innerHTML = `
+    <div class="receipt">
+      <button class="receipt-close-btn" onclick="dismissReceipt()" title="關閉">
+        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><use href="#ic-x"/></svg>
+      </button>
+      <h4>美安台灣</h4>
+      <div class="subtitle">${dateStr} · ${orderNo}</div>
+      <div class="receipt-items">${itemsHTML}</div>
+      <div class="receipt-total">
+        ${memberLine}
+        <div class="rt-row"><span>價格類型</span><span>${priceMode==='cost'?'超連鎖成本價':'零售價'}</span></div>
+        <div class="rt-row" style="color:#185fa5"><span>累計 BV</span><span>${bv} BV</span></div>
+        <div class="rt-row" style="color:#2a7a4b"><span>零售價差合計</span><span>+NT$${totalDiff.toLocaleString()}</span></div>
+        <hr style="border:none;border-top:0.5px solid rgba(0,0,0,0.1);margin:6px 0">
+        <div class="rt-row big"><span>應付金額</span><span>NT$${total.toLocaleString()}</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <button class="close-receipt" style="background:transparent;color:var(--text);border:0.5px solid var(--border-sec)" onclick="closeReceipt()">
+          <span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-check"/></svg></span>完成收款
+        </button>
+        <button class="close-receipt" onclick="downloadPDF()">
+          <span class="icon" style="width:14px;height:14px"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-photo"/></svg></span>下載圖片
+        </button>
+      </div>
+    </div>
+  `;
+  overlay._snapshot = snapshot;
+  overlay._meta = { orderNo, dateStr, bv, total, totalDiff };
+  window._lastReceipt = { snapshot, orderNo, dateStr, bv, total, totalDiff, priceMode, member: selectedMember ? {...selectedMember} : null };
+  document.body.appendChild(overlay);
+}
+
+function drawReceiptCanvas(r) {
+  const W = 360, PAD = 22;
+  const fonts = '"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif';
+
+  function wrap(ctx, text, maxW) {
+    const lines = []; let cur = '';
+    for (const ch of text) {
+      if (ctx.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ch; }
+      else cur += ch;
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+
+  /* ── 預算高度 ── */
+  const tmp = document.createElement('canvas');
+  tmp.width = W; tmp.height = 10;
+  const tc = tmp.getContext('2d');
+  let h = 24;
+  h += 28 + 16 + 14 + 13 + (r.member ? 15 : 0) + 22;
+  r.snapshot.forEach(item => {
+    tc.font = `13px ${fonts}`;
+    h += wrap(tc, `${item.name}  ×${item.qty}`, W - PAD * 2 - 72).length * 17 + 15 + 8;
+  });
+  h += 16 + 18 * 3 + 10 + 28 + 16 + 30;
+
+  /* ── 繪製 ── */
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = h;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, h);
+
+  let y = 24;
+  const hline = () => {
+    ctx.save(); ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.75;
+    ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(W - PAD, y); ctx.stroke(); ctx.restore();
+  };
+
+  /* 標頭 */
+  ctx.textAlign = 'center';
+  ctx.font = `bold 22px ${fonts}`; ctx.fillStyle = '#111';
+  y += 24; ctx.fillText('美安台灣', W / 2, y);
+
+  y += 16; ctx.font = `10px ${fonts}`; ctx.fillStyle = '#bbb';
+  ctx.fillText('Market America Taiwan', W / 2, y);
+
+  y += 14; ctx.font = `11px ${fonts}`; ctx.fillStyle = '#888';
+  ctx.fillText(r.dateStr, W / 2, y);
+
+  y += 13; ctx.font = `10px ${fonts}`; ctx.fillStyle = '#bbb';
+  ctx.fillText(r.orderNo, W / 2, y);
+
+  if (r.member) {
+    y += 15; ctx.font = `11px ${fonts}`; ctx.fillStyle = '#666';
+    ctx.fillText(`會員：${r.member.name}（${r.member.type === 'cost' ? '超連鎖' : '零售'}）`, W / 2, y);
+  }
+
+  y += 14; hline(); y += 13;
+
+  /* 品項 */
+  r.snapshot.forEach(item => {
+    ctx.textAlign = 'left';
+    ctx.font = `13px ${fonts}`; ctx.fillStyle = '#333';
+    const nameLines = wrap(ctx, `${item.name}  ×${item.qty}`, W - PAD * 2 - 72);
+    nameLines.forEach((line, i) => ctx.fillText(line, PAD, y + i * 17));
+
+    ctx.textAlign = 'right'; ctx.font = `bold 13px ${fonts}`; ctx.fillStyle = '#111';
+    ctx.fillText(`NT$${item.line.toLocaleString()}`, W - PAD, y + Math.floor((nameLines.length - 1) / 2) * 17);
+
+    y += nameLines.length * 17;
+    ctx.textAlign = 'left'; ctx.font = `10px ${fonts}`; ctx.fillStyle = '#aaa';
+    ctx.fillText(`${item.sku}  ·  BV ${item.bv}`, PAD, y);
+    y += 15 + 8;
+  });
+
+  /* 摘要 */
+  y += 2; hline(); y += 14;
+  [
+    ['價格類型', r.priceMode === 'cost' ? '超連鎖成本價' : '零售價', '#777'],
+    ['累計 BV', `${r.bv} BV`, '#185fa5'],
+    ['零售價差合計', `+NT$${r.totalDiff.toLocaleString()}`, '#2a7a4b'],
+  ].forEach(([label, val, color]) => {
+    ctx.textAlign = 'left'; ctx.font = `12px ${fonts}`; ctx.fillStyle = '#777';
+    ctx.fillText(label, PAD, y);
+    ctx.textAlign = 'right'; ctx.fillStyle = color;
+    ctx.fillText(val, W - PAD, y);
+    y += 18;
+  });
+
+  y += 8; hline(); y += 18;
+  ctx.textAlign = 'left'; ctx.font = `bold 15px ${fonts}`; ctx.fillStyle = '#111';
+  ctx.fillText('應付金額', PAD, y);
+  ctx.textAlign = 'right'; ctx.font = `bold 21px ${fonts}`;
+  ctx.fillText(`NT$${r.total.toLocaleString()}`, W - PAD, y);
+
+  y += 14; hline(); y += 16;
+  ctx.textAlign = 'center'; ctx.font = `10px ${fonts}`; ctx.fillStyle = '#ccc';
+  ctx.fillText('感謝您的購買　Thank you for your purchase', W / 2, y);
+
+  return cv;
+}
+
+function canvasToPDF(cv) {
+  const WP = cv.width, HP = cv.height;
+  const PTW = Math.round(100 * 2.8346);
+  const PTH = Math.round(HP * PTW / WP);
+  const jpeg = Uint8Array.from(atob(cv.toDataURL('image/jpeg', 0.92).split(',')[1]), c => c.charCodeAt(0));
+  const JL = jpeg.length;
+  const te = s => new TextEncoder().encode(s);
+  const o1 = te('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  const o2 = te('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+  const o3 = te(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PTW} ${PTH}]\n/Contents 4 0 R /Resources << /XObject << /I0 5 0 R >> >> >>\nendobj\n`);
+  const sc = `q ${PTW} 0 0 ${PTH} 0 0 cm /I0 Do Q`;
+  const o4 = te(`4 0 obj\n<< /Length ${sc.length} >>\nstream\n${sc}\nendstream\nendobj\n`);
+  const o5h = te(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${WP} /Height ${HP} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${JL} >>\nstream\n`);
+  const o5t = te('\nendstream\nendobj\n');
+  const hdr = te('%PDF-1.4\n');
+  let off = hdr.length; const xo = [];
+  [o1, o2, o3, o4].forEach(o => { xo.push(off); off += o.length; });
+  xo.push(off); off += o5h.length + JL + o5t.length;
+  const xr = te('xref\n0 6\n0000000000 65535 f \n' +
+    xo.map(o => o.toString().padStart(10, '0') + ' 00000 n \n').join('') +
+    `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${off}\n%%EOF`);
+  const tot = hdr.length + o1.length + o2.length + o3.length + o4.length + o5h.length + JL + o5t.length + xr.length;
+  const buf = new Uint8Array(tot); let p = 0;
+  [hdr, o1, o2, o3, o4, o5h].forEach(a => { buf.set(a, p); p += a.length; });
+  buf.set(jpeg, p); p += JL;
+  [o5t, xr].forEach(a => { buf.set(a, p); p += a.length; });
+  return new Blob([buf], { type: 'application/pdf' });
+}
+
+function downloadPDF() {
+  const r = window._lastReceipt;
+  if (!r) { showToast('找不到收據資料'); return; }
+  try {
+    const canvas = drawReceiptCanvas(r);
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `美安收據_${r.orderNo}.jpg`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      showToast('✓ 圖片已下載');
+    }, 'image/jpeg', 0.95);
+  } catch(e) {
+    showToast('圖片產生失敗');
+  }
+}
+
+function saveOrderToDB() {
+  const r = window._lastReceipt;
+  if (!r) return;
+  const orders = JSON.parse(localStorage.getItem('pos_orders') || '[]');
+  orders.unshift({
+    orderNo: r.orderNo,
+    dateStr: r.dateStr,
+    timestamp: Date.now(),
+    member: r.member,
+    priceMode: r.priceMode,
+    items: r.snapshot.map(i => ({ sku:i.sku, name:i.name, qty:i.qty, price:i.price, line:i.line, bv:i.bv })),
+    bv: r.bv,
+    total: r.total,
+    totalDiff: r.totalDiff
+  });
+  localStorage.setItem('pos_orders', JSON.stringify(orders));
+}
+
+function loadOrders() {
+  return JSON.parse(localStorage.getItem('pos_orders') || '[]');
+}
+
+function deleteOrder(orderNo) {
+  showConfirm('確定要刪除這筆訂單記錄？', () => {
+    const orders = loadOrders().filter(o => o.orderNo !== orderNo);
+    localStorage.setItem('pos_orders', JSON.stringify(orders));
+    renderOrderList();
+  });
+}
+
+function clearAllOrders() {
+  const orders = loadOrders();
+  if (!orders.length) { showToast('目前沒有訂單記錄'); return; }
+  showConfirm(`確定要清除全部 ${orders.length} 筆訂單記錄？`, () => {
+    localStorage.removeItem('pos_orders');
+    renderOrderList();
+  });
+}
+
+function renderOrderList() {
+  const orders = loadOrders();
+  const statsEl = document.getElementById('order-stats');
+  const listEl  = document.getElementById('order-list');
+
+  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
+  const totalBV      = orders.reduce((s, o) => s + o.bv, 0);
+  statsEl.innerHTML = `
+    <div class="order-stat"><span class="order-stat-label">訂單數</span><span class="order-stat-val">${orders.length}</span></div>
+    <div class="order-stat"><span class="order-stat-label">總營業額</span><span class="order-stat-val">NT$${totalRevenue.toLocaleString()}</span></div>
+    <div class="order-stat"><span class="order-stat-label">累計 BV</span><span class="order-stat-val" style="color:var(--text-info)">${totalBV}</span></div>
+  `;
+
+  if (!orders.length) {
+    listEl.innerHTML = '<div class="order-empty">尚無訂單記錄<br>完成收款後將自動儲存於此</div>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  orders.forEach(o => {
+    const item = document.createElement('div');
+    item.className = 'order-item';
+    const badgeClass = o.priceMode === 'retail' ? 'order-badge retail' : 'order-badge';
+    const memberStr = o.member ? `<span style="font-size:11px;color:var(--text-sec)">${o.member.name}</span>` : '';
+    item.innerHTML = `
+      <div class="order-item-head" onclick="toggleOrderDetail(this)">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span class="order-date">${o.dateStr}</span>
+            ${memberStr}
+          </div>
+          <span class="order-no">${o.orderNo}</span>
+        </div>
+        <div class="order-meta">
+          <span class="${badgeClass}">${o.priceMode==='cost'?'超連鎖':'零售'}</span>
+          <div style="text-align:right">
+            <div class="order-total">NT$${o.total.toLocaleString()}</div>
+            <div class="order-bv">BV ${o.bv}</div>
+          </div>
+          <span class="icon" style="width:14px;height:14px;color:var(--text-ter)"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-chevron-right"/></svg></span>
+        </div>
+      </div>
+      <div class="order-detail">
+        ${o.items.map(i => `
+          <div class="order-detail-item">
+            <span class="order-detail-name">${i.name.substring(0,24)}${i.name.length>24?'…':''} ×${i.qty}</span>
+            <span>NT$${i.line.toLocaleString()}</span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sec);padding:6px 0 4px">
+          <span>零售價差合計</span><span style="color:#2a7a4b">+NT$${o.totalDiff.toLocaleString()}</span>
+        </div>
+        <div class="order-detail-actions">
+          <button class="order-action-btn" onclick="reprintOrder('${o.orderNo}')">
+            <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-photo"/></svg></span> 下載圖片
+          </button>
+          <button class="order-action-btn danger" onclick="deleteOrder('${o.orderNo}')">
+            <span class="icon" style="width:13px;height:13px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><use href="#ic-trash"/></svg></span> 刪除
+          </button>
+        </div>
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+function toggleOrderDetail(headEl) {
+  const detail = headEl.nextElementSibling;
+  detail.classList.toggle('open');
+  const chevron = headEl.querySelector('use[href="#ic-chevron-right"]');
+  if (detail.classList.contains('open')) {
+    chevron && (chevron.closest('svg').style.transform = 'rotate(90deg)');
+  } else {
+    chevron && (chevron.closest('svg').style.transform = '');
+  }
+}
+
+function reprintOrder(orderNo) {
+  const orders = loadOrders();
+  const o = orders.find(x => x.orderNo === orderNo);
+  if (!o) { showToast('找不到訂單資料'); return; }
+  window._lastReceipt = {
+    orderNo: o.orderNo, dateStr: o.dateStr,
+    snapshot: o.items.map(i => ({...i, diff:(i.line/i.qty - i.price) * i.qty})),
+    bv: o.bv, total: o.total, totalDiff: o.totalDiff,
+    priceMode: o.priceMode, member: o.member
+  };
+  downloadPDF();
+}
+
+function dismissReceipt() {
+  const ol = document.querySelector('.receipt-overlay');
+  if (ol) ol.remove();
+}
+
+function closeReceipt() {
+  saveOrderToDB();
+  const ol = document.querySelector('.receipt-overlay');
+  if (ol) ol.remove();
+  showToast('✓ 收款完成，訂單已記錄');
+  cart = []; renderCart();
+}
+
+renderCats();
+filterProds();
+renderCart();
+</script>
+</body>
+</html>
