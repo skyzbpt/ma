@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>sky · 美安台灣 POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+:root{
+  --bg:#f4efe4; --paper:#ffffff; --ink:#1c211e; --muted:#6b7269;
+  --line:#e3dccd; --primary:#0f3d3e; --primary-2:#155457; --accent:#d97742;
+  --accent-soft:#f6e3d4; --good:#2f8f5b; --danger:#c0492f; --gold:#b48a3d;
+  --shadow:0 1px 2px rgba(28,33,30,.05),0 8px 24px -12px rgba(28,33,30,.18);
+  --radius:16px; --rail:84px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 100% -10%,rgba(15,61,62,.06),transparent 60%),
+    radial-gradient(900px 500px at -10% 110%,rgba(217,119,66,.07),transparent 60%),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+.mono{font-family:"Noto Sans TC",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:15px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#cdc6b5;border-radius:20px;border:3px solid transparent;background-clip:content-box}
+
+/* layout */
+.app{display:grid;grid-template-columns:var(--rail) 1fr;height:100vh;height:100dvh}
+.rail{
+  background:var(--primary);color:#e9efe9;display:flex;flex-direction:column;align-items:center;
+  padding:14px 8px;gap:6px;
+}
+.brand{width:52px;height:52px;border-radius:14px;background:linear-gradient(160deg,var(--accent),#c25f2e);
+  display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px;line-height:1.05;text-align:center;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);margin-bottom:10px;overflow:hidden}
+.brand img{width:100%;height:100%;object-fit:cover}
+.nav-btn{width:68px;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  color:#bcccc4;font-size:11px;font-weight:700;transition:.15s;background:transparent}
+.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav-btn.active{color:var(--primary);background:#e9efe9}
+.rail-spacer{flex:1}
+
+.main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.6);backdrop-filter:blur(8px)}
+.topbar h1{margin:0;font-size:19px;font-weight:900;letter-spacing:.3px}
+.topbar .sub{color:var(--muted);font-size:12.5px;font-weight:500;margin-top:1px}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{font-size:13px;color:var(--muted);text-align:right}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid var(--line)}
+.icon-btn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8}
+.icon-btn:hover{border-color:var(--accent)}
+
+.view{flex:1;overflow:hidden;display:none}
+.view.active{display:flex}
+
+/* POS – full width catalog */
+.pos{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;position:relative}
+.catalog{display:flex;flex-direction:column;overflow:hidden;padding:18px 22px 0;min-height:0;flex:1}
+.tools{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-align-items:center;align-items:center;margin-bottom:14px;margin-right:-10px}
+.tools>*{margin-right:10px;margin-bottom:4px}
+.search{flex:1;max-width:520px;position:relative}
+.search input{width:100%;padding:13px 16px 13px 44px;border-radius:14px;border:1.5px solid var(--line);background:#fff;outline:none;font-size:15px}
+.search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,61,62,.08)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;stroke:var(--muted);fill:none;stroke-width:2}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:14px;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:9px 18px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;
+  white-space:nowrap;color:var(--muted);transition:.15s;flex-shrink:0}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-content:start;padding:0 0 100px}
+/* big tap-friendly cards */
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;
+  gap:10px;text-align:left;transition:.15s;position:relative;box-shadow:var(--shadow);cursor:pointer;user-select:none}
+.card:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:0 8px 32px -8px rgba(15,61,62,.22)}
+.card:active{transform:scale(.97);transition:.05s}
+.card .nm{font-size:15px;font-weight:700;line-height:1.4;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .price{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-.5px}
+.card .bv-pill{display:inline-block;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;align-self:flex-start}
+.card .edit{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:9px;background:rgba(244,239,228,.9);display:none;place-items:center;backdrop-filter:blur(4px)}
+.card:hover .edit{display:grid}
+.card .edit svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+.card .edit:hover{background:var(--accent-soft)}
+.card .added-flash{position:absolute;inset:0;border-radius:17px;background:rgba(15,61,62,.08);opacity:0;pointer-events:none;transition:.3s}
+.empty{color:var(--muted);text-align:center;padding:60px;font-size:15px;grid-column:1/-1}
+
+/* FAB – floating cart button */
+.fab{position:fixed;bottom:28px;right:28px;z-index:30;display:flex;align-items:center;gap:12px;
+  background:var(--primary);color:#fff;border-radius:999px;padding:0 22px 0 18px;height:60px;
+  box-shadow:0 8px 28px -6px rgba(15,61,62,.55);transition:.2s;border:none;font-family:inherit;cursor:pointer}
+.fab:hover{background:var(--primary-2);transform:translateY(-2px)}
+.fab:active{transform:scale(.97)}
+.fab-icon{width:26px;height:26px;position:relative}
+.fab-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2}
+.fab-badge{position:absolute;top:-8px;right:-10px;min-width:20px;height:20px;border-radius:99px;background:var(--accent);
+  color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 5px;border:2px solid var(--primary)}
+.fab-info{display:flex;flex-direction:column;align-items:flex-start}
+.fab-label{font-size:12px;font-weight:700;opacity:.75;line-height:1}
+.fab-total{font-size:17px;font-weight:900;line-height:1.2}
+.fab.empty-cart{background:#888;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+
+/* Cart drawer */
+.drawer-overlay{position:fixed;inset:0;background:rgba(28,33,30,.45);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:.25s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;width:440px;max-width:100vw;height:100%;z-index:41;
+  background:#fff;display:flex;flex-direction:column;
+  box-shadow:-8px 0 40px rgba(28,33,30,.18);
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;padding:18px 18px 14px;border-bottom:1px solid var(--line);gap:12px;flex-shrink:0}
+.drawer-head h3{margin:0;font-size:17px;font-weight:900;flex:1}
+.dclose,.x,.x-red{width:44px;height:44px;border-radius:13px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:#f7e0d9;border:1.5px solid #f0c9bd;font-size:20px;font-weight:900;color:var(--danger);transition:.12s;cursor:pointer;-webkit-appearance:none;appearance:none;line-height:1;text-align:center}
+.dclose svg{width:18px;height:18px;stroke:var(--danger);fill:none;stroke-width:2.5;display:block}
+.dclose:hover,.x:hover,.x-red:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+.dclose:hover svg{stroke:#fff}
+.member-sel{display:flex;gap:8px;align-items:center;padding:14px 18px 0;flex-shrink:0}
+.member-sel select{flex:1;padding:11px 12px;border-radius:11px;border:1px solid var(--line);background:#faf8f2;outline:none}
+.pmode{display:flex;gap:5px;margin:12px 18px 0;background:#f4efe4;padding:4px;border-radius:11px;flex-shrink:0}
+.pmode button{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted)}
+.pmode button.on{background:#fff;color:var(--primary);box-shadow:var(--shadow)}
+.cart-items{flex:1;overflow-y:auto;padding:4px 18px}
+.line{display:flex;gap:10px;padding:13px 0;border-bottom:1px dashed var(--line)}
+.line .li-nm{flex:1;min-width:0}
+.line .li-nm .t{font-size:14px;font-weight:600;line-height:1.3}
+.line .li-nm .c{font-size:11px;color:var(--accent);font-weight:700;margin-bottom:3px}
+.line .li-price{display:flex;align-items:center;gap:3px;margin-top:6px}
+.line .li-price input{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:9px;text-align:right;font-size:13px}
+.qty{display:flex;align-items:center;gap:8px}
+.qbtn{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:18px;background:#faf8f2;transition:.1s}
+.qbtn:hover{border-color:var(--primary);background:#e8f0ef}
+.qn{min-width:28px;text-align:center;font-weight:700;font-size:16px}
+.li-sub{min-width:68px;text-align:right;font-weight:700;font-size:15px}
+.li-rm{color:var(--danger);font-size:11px;margin-top:5px;font-weight:700;cursor:pointer}
+.cart-foot{border-top:1px solid var(--line);padding:14px 18px 20px;background:#faf8f2;flex-shrink:0}
+.note-in{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);margin-bottom:12px;resize:none;outline:none;background:#fff}
+.totals{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;font-size:14px}
+.totals .r{display:flex;justify-content:space-between;color:var(--muted);padding:2px 0}
+.totals .grand{font-size:26px;font-weight:900;color:var(--primary);display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid var(--line)}
+.cart-btns{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.btn{padding:15px;border-radius:13px;font-weight:700;font-size:15px;transition:.12s;text-align:center;cursor:pointer}
+.btn.primary{background:var(--primary);color:#fff;border:none}
+.btn.primary:hover{background:var(--primary-2)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+.btn.ghost:hover{border-color:var(--danger);color:var(--danger)}
+.cart-empty-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;color:var(--muted);text-align:center}
+.cart-empty-msg svg{width:48px;height:48px;stroke:var(--line);stroke-width:1.5;fill:none}
+
+/* generic page */
+.page{flex:1;overflow-y:auto;padding:22px 26px;width:100%}
+.page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.page-head h2{margin:0;font-size:22px;font-weight:900}
+.page-head .sp{flex:1}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.panel-pad{padding:18px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line);background:#faf8f2;position:sticky;top:0}
+td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.clk:hover{background:#faf8f2;cursor:pointer}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12.5px;font-weight:700;color:var(--muted)}
+.field input,.field select,.field textarea{padding:11px 12px;border-radius:11px;border:1px solid var(--line);outline:none;background:#faf8f2}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);background:#fff}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.stat .k{font-size:12px;color:var(--muted);font-weight:700}
+.stat .v{font-size:26px;font-weight:900;margin-top:4px;color:var(--primary)}
+.mini{font-size:12px;color:var(--accent);font-weight:700;padding:6px 11px;border-radius:9px;background:var(--accent-soft)}
+.mini:hover{background:#f0d4bd}
+.mini.gray{background:#eee9dd;color:var(--muted)}
+.mini.red{background:#f7e0d9;color:var(--danger)}
+
+/* category manager */
+.cat-list{list-style:none;margin:0;padding:0}
+.cat-item{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;background:#fff;box-shadow:var(--shadow);transition:.15s}
+.cat-item:hover{border-color:#c8c2b2}
+.cat-order{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-flex-shrink:0;flex-shrink:0;margin-right:10px}
+.ord-btn{width:28px;height:26px;border-radius:7px;border:1px solid var(--line);background:#faf8f2;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;transition:.1s;cursor:pointer;margin-bottom:3px;padding:0;-webkit-appearance:none;appearance:none}
+.ord-btn:last-child{margin-bottom:0}
+.ord-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+.ord-btn:disabled{opacity:.25;cursor:not-allowed;pointer-events:none}
+.ord-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
+.cat-item input{-webkit-flex:1;flex:1;border:none;background:transparent;font-size:15px;font-weight:700;outline:none;padding:6px;min-width:0;margin-right:10px}
+.cat-item input:focus{background:#faf8f2;border-radius:8px;padding:6px 8px}
+.cat-count{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;background:#eee9dd;padding:3px 9px;border-radius:99px;margin-right:10px}
+
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(28,33,30,.5);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;padding:20px}
+.mask.show{display:grid}
+.modal{background:var(--bg);border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;padding:18px 20px 0}
+.modal-head h3{margin:0;font-size:18px;font-weight:900}
+.modal-head .x,.modal-head .x-red{margin-left:auto}
+.modal-body{padding:18px 20px 20px}
+.modal-foot{display:flex;gap:10px;padding:0 20px 20px;justify-content:flex-end}
+
+/* receipt */
+.receipt{background:#fff;width:380px;margin:0 auto;padding:26px 26px 22px;color:#1c211e;border:1px solid var(--line)}
+.receipt .rc-top{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--primary);padding-bottom:14px}
+.receipt .rc-logo{width:46px;height:46px;border-radius:11px;background:linear-gradient(160deg,var(--accent),#c25f2e);display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px;text-align:center;line-height:1.05;overflow:hidden}
+.receipt .rc-logo img{width:100%;height:100%;object-fit:cover}
+.receipt .rc-store{font-size:17px;font-weight:900}
+.receipt .rc-tag{font-size:11px;color:var(--muted);font-weight:700}
+.receipt .rc-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:14px 0 8px}
+.receipt .rc-title{font-size:13px;font-weight:900;letter-spacing:3px;text-align:center;margin:6px 0 12px;color:var(--primary)}
+.receipt table{font-size:12.5px}
+.receipt th{background:transparent;padding:6px 0;border-bottom:1px solid #1c211e;color:#1c211e;font-size:11px;position:static}
+.receipt td{padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.receipt .rc-tot{margin-top:12px;border-top:2px solid var(--primary);padding-top:10px;font-size:13px}
+.receipt .rc-tot .r{display:flex;justify-content:space-between;padding:3px 0;color:var(--muted)}
+.receipt .rc-tot .g{font-size:21px;font-weight:900;color:var(--primary);display:flex;justify-content:space-between;margin-top:4px}
+.receipt .rc-foot{text-align:center;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.7}
+.receipt .rc-note{font-size:12px;background:#faf8f2;border-radius:9px;padding:9px 11px;margin-top:12px;color:#444}
+
+/* toast */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+  padding:13px 22px;border-radius:13px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:99;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;grid-template-rows:1fr var(--rail)}
+  .rail{flex-direction:row;order:2;padding:6px;overflow-x:auto}
+  .brand{display:none}.rail-spacer{display:none}
+  .nav-btn{width:auto;flex:1;min-width:64px}
+  .main{order:1}
+  .drawer{width:100vw}
+  .fab{bottom:90px;right:18px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="brand" id="railLogo">sky</div>
+    <button class="nav-btn active" data-view="pos" onclick="go('pos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <!-- register body -->
+        <rect x="2" y="9" width="20" height="12" rx="2"/>
+        <!-- raised back panel with display -->
+        <path d="M14 4h5a1 1 0 011 1v4H14V4z"/>
+        <!-- display line -->
+        <path d="M15.5 6.5h3"/>
+        <!-- key buttons row -->
+        <path d="M5 13.5h2.5M10 13.5h2.5M15 13.5h4"/>
+        <!-- cash drawer -->
+        <rect x="3" y="17.5" width="8" height="2" rx="1"/>
+      </svg>收銀</button>
+    <button class="nav-btn" data-view="members" onclick="go('members')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>會員</button>
+    <button class="nav-btn" data-view="cats" onclick="go('cats')">
+      <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="4" rx="1"/><rect x="4" y="13" width="16" height="4" rx="1"/></svg>分類</button>
+    <button class="nav-btn" data-view="records" onclick="go('records')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <!-- chart bars -->
+        <rect x="3" y="12" width="4" height="9" rx="1"/>
+        <rect x="9.5" y="7" width="4" height="14" rx="1"/>
+        <rect x="16" y="3" width="4" height="18" rx="1"/>
+        <!-- baseline -->
+        <path d="M2 21h20"/>
+      </svg>後台</button>
+    <div class="rail-spacer"></div>
+    <button class="nav-btn" onclick="openSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>設定</button>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="storeTitle">美安台灣 POS</h1>
+        <div class="sub">sky 銷售管理系統</div>
+      </div>
+      <div class="top-right">
+        <div class="clock"><div id="cDate"></div><div id="cTime" class="mono" style="font-weight:700;color:var(--ink);font-size:15px"></div></div>
+      </div>
+    </header>
+
+    <!-- POS -->
+    <section class="view active" id="view-pos">
+      <div class="pos">
+        <div class="catalog">
+          <div class="tools">
+            <div class="search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+              <input id="search" placeholder="搜尋產品名稱或代號…" oninput="renderGrid()">
+            </div>
+            <button class="mini" onclick="openAddProduct()">＋ 新增產品</button>
+          </div>
+          <div class="chips" id="chips"></div>
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <button class="fab empty-cart" id="fab" onclick="openDrawer()">
+        <div class="fab-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <span class="fab-badge" id="fabBadge" style="display:none">0</span>
+        </div>
+        <div class="fab-info">
+          <span class="fab-label">購物車</span>
+          <span class="fab-total mono" id="fabTotal">NT$0</span>
+        </div>
+      </button>
+
+      <!-- Cart drawer overlay -->
+      <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+      <!-- Cart drawer -->
+      <div class="drawer" id="cartDrawer">
+        <div class="drawer-head">
+          <h3>購物車</h3>
+          <button class="dclose" onclick="closeDrawer()">✕</button>
+        </div>
+        <div class="member-sel">
+          <select id="cartMember"><option value="">— 散客 —</option></select>
+          <button class="icon-btn" title="新增會員" onclick="openMemberModal()">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="pmode">
+          <button id="pmRetail" class="on" onclick="setPmode('retail')">零售價</button>
+          <button id="pmCost" onclick="setPmode('cost')">成本價</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-foot">
+          <textarea class="note-in" id="cartNote" rows="2" placeholder="備註（例：付款方式 / 訂單來源）"></textarea>
+          <div class="totals">
+            <div class="r"><span>件數</span><span id="tCount" class="mono">0</span></div>
+            <div class="r"><span>總 BV</span><span id="tBV" class="mono">0</span></div>
+            <div class="grand"><span>合計</span><span class="mono" id="tGrand">NT$0</span></div>
+          </div>
+          <div class="cart-btns">
+            <button class="btn ghost" onclick="clearCart()">清空</button>
+            <button class="btn primary" id="checkoutBtn" onclick="checkout()" disabled>結帳</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Members -->
+    <section class="view" id="view-members">
+      <div class="page">
+        <div class="page-head"><h2>會員管理</h2><div class="sp"></div>
+          <span class="mini gray" id="memCount"></span>
+          <button class="mini" onclick="openMemberModal()">＋ 新增會員</button></div>
+        <div class="panel" style="overflow:auto">
+          <table><thead><tr><th>姓名</th><th>電話</th><th>備註</th><th>消費筆數</th><th>累計金額</th><th></th></tr></thead>
+          <tbody id="memBody"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="view" id="view-cats">
+      <div class="page">
+        <div class="page-head"><h2>分類管理</h2>
+          <span class="sub" style="color:var(--muted);font-size:13px">點 ↑ ↓ 調整順序，同步到收銀台</span>
+          <div class="sp"></div>
+          <button class="mini" onclick="openAddCatModal()">＋ 新增分類</button></div>
+        <div style="display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:18px;align-items:start">
+          <div class="panel panel-pad" style="-webkit-flex:0 0 320px;flex:0 0 320px;min-width:260px">
+            <ul class="cat-list" id="catList"></ul>
+          </div>
+          <div class="panel" style="-webkit-flex:1;flex:1;min-width:280px;overflow:hidden">
+            <div style="padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-weight:700;font-size:14px">產品分類指派</span>
+              <select id="catFilter" onchange="renderProdCatList()" style="padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#faf8f2;font-size:13px">
+                <option value="all">全部產品</option>
+              </select>
+              <div class="search" style="flex:1;min-width:150px">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+                <input id="catProdSearch" placeholder="搜尋產品…" oninput="renderProdCatList()" style="padding:8px 10px 8px 36px;font-size:13px">
+              </div>
+            </div>
+            <div style="overflow-y:auto;max-height:calc(100vh - 280px)">
+              <table><thead><tr><th>產品名稱</th><th>代號</th><th style="min-width:140px">所屬分類</th></tr></thead>
+              <tbody id="prodCatBody"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Records -->
+    <section class="view" id="view-records">
+      <div class="page">
+        <div class="page-head"><h2>後台 · 消費記錄</h2><div class="sp"></div>
+          <button class="mini gray" onclick="exportBackup()">匯出備份</button>
+          <button class="mini gray" onclick="document.getElementById('importFile').click()">匯入備份</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importBackup(event)">
+        </div>
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="page-head" style="margin-bottom:12px">
+          <select id="fMember" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff"><option value="">全部會員</option></select>
+          <input type="date" id="fFrom" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff">
+          <span style="color:var(--muted)">至</span>
+          <input type="date" id="fTo" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff">
+          <button class="mini gray" onclick="document.getElementById('fMember').value='';document.getElementById('fFrom').value='';document.getElementById('fTo').value='';renderRecords()">清除</button>
+        </div>
+        <div class="panel" style="overflow:auto;margin-bottom:18px">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px">
+            <span>分類價差分析</span>
+            <span style="font-size:12px;color:var(--muted);font-weight:400">依篩選條件計算</span>
+          </div>
+          <table>
+            <thead><tr><th>分類</th><th style="text-align:right">件數</th><th style="text-align:right;color:#2f8f5b">零售價差</th><th style="text-align:right;color:#1a6abf">實際利潤</th><th style="text-align:right">達成率</th></tr></thead>
+            <tbody id="spreadTable"></tbody>
+          </table>
+        </div>
+        <div class="panel" style="overflow:auto">
+          <table><thead><tr><th>時間</th><th>會員</th><th>明細</th><th>件數</th><th>BV</th><th>金額</th><th style="color:#1a6abf">利潤</th><th></th></tr></thead>
+          <tbody id="recBody"></tbody></table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- product edit modal -->
+<div class="mask" id="prodMask">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head"><h3 id="prodModalTitle">編輯產品</h3><button class="x" onclick="closeMask('prodMask')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>產品代號 *</label><input id="epCode" placeholder="例：T12345"></div>
+      <div class="field"><label>品名 *</label><input id="epName" placeholder="產品名稱"></div>
+      <div class="field"><label>分類</label><select id="epCat"></select></div>
+      <div style="display:-webkit-flex;display:flex;gap:10px">
+        <div class="field" style="width:80px;flex-shrink:0"><label>BV</label><input id="epBV" type="number" step="0.5" placeholder="0"></div>
+        <div class="field" style="-webkit-flex:1;flex:1;min-width:100px"><label>成本價</label><input id="epCost" type="number" placeholder="0"></div>
+        <div class="field" style="-webkit-flex:1;flex:1;min-width:100px"><label>零售價</label><input id="epRetail" type="number" placeholder="0"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" id="prodDelBtn" onclick="deleteProduct()" style="color:var(--danger);border-color:#f0c9bd;display:none">刪除產品</button>
+      <button class="btn ghost" onclick="closeMask('prodMask')">取消</button>
+      <button class="btn primary" onclick="saveProduct()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- receipt / detail modal -->
+<div class="mask" id="recMask">
+  <div class="modal">
+    <div class="modal-head"><h3 id="recModalTitle">消費明細</h3><button class="x-red" onclick="closeMask('recMask')">✕</button></div>
+    <div class="modal-body">
+      <div id="receiptHost"></div>
+    </div>
+    <div class="modal-foot" id="recFootNormal">
+      <button class="btn ghost" id="recDelBtn" onclick="showDelConfirm()" style="display:none;color:var(--danger);border-color:#f0c9bd">刪除此筆</button>
+      <button class="btn ghost" onclick="closeMask('recMask')">關閉</button>
+      <button class="btn primary" onclick="exportReceipt()">匯出 JPG</button>
+    </div>
+    <div class="modal-foot" id="recFootConfirm" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 20px;background:#fff3f1;border-top:1px solid #f0c9bd;border-radius:0 0 20px 20px;text-align:center">
+      <span style="font-size:15px;font-weight:700;color:var(--danger)">確定刪除這筆消費記錄？</span>
+      <div style="display:flex;gap:10px;width:100%">
+        <button class="btn ghost" onclick="hideDelConfirm()" style="flex:1">取消</button>
+        <button class="btn primary" onclick="deleteCurrentTxn()" style="flex:2;background:var(--danger)">確定刪除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- member modal -->
+<div class="mask" id="memberMask">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3 id="memberModalTitle">新增會員</h3><button class="x" onclick="closeMask('memberMask')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>姓名 *</label><input id="mName" placeholder="會員姓名"></div>
+      <div class="field"><label>電話</label><input id="mPhone" placeholder="連絡電話" inputmode="tel"></div>
+      <div class="field"><label>備註</label><textarea id="mNote" rows="3" placeholder="會員編號 / 推薦人 / 其他"></textarea></div>
+      <input type="hidden" id="mEditId">
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeMask('memberMask')">取消</button>
+      <button class="btn primary" onclick="saveMember()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- add category modal -->
+<div class="mask" id="addCatMask">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head"><h3>新增分類</h3><button class="x" onclick="closeMask('addCatMask')">✕</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>分類名稱</label>
+        <input id="newCatName" placeholder="輸入分類名稱…" onkeydown="if(event.key==='Enter')addCat()">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeMask('addCatMask')">取消</button>
+      <button class="btn primary" onclick="addCat()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- confirm modal -->
+<div class="mask" id="confirmMask">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-body" style="text-align:center;padding:30px 24px 16px">
+      <div id="confirmMsg" style="font-size:16px;font-weight:700;line-height:1.6;color:var(--ink)"></div>
+      <div id="confirmSub" style="font-size:13px;color:var(--muted);margin-top:6px"></div>
+    </div>
+    <div class="modal-foot" style="justify-content:center;gap:12px;padding-bottom:24px">
+      <button class="btn ghost" style="flex:1" onclick="closeMask('confirmMask')">取消</button>
+      <button class="btn primary" id="confirmOkBtn" style="flex:1">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- settings modal -->
+<div class="mask" id="setMask">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h3>設定</h3><button class="x" onclick="closeMask('setMask')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>店家 / 品牌名稱</label><input id="setStore"></div>
+      <div class="field"><label>收據抬頭副標</label><input id="setTag"></div>
+      <div class="field"><label>商店 Logo（顯示於收據與側欄）</label>
+        <input type="file" id="setLogo" accept="image/*" onchange="onLogoPick(event)">
+        <div id="logoPreview" style="margin-top:8px"></div>
+      </div>
+      <button class="mini red" onclick="clearLogo()">移除 Logo</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeMask('setMask')">取消</button>
+      <button class="btn primary" onclick="saveSettings()">儲存設定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ storage ============ */
+let useLS=true;
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){useLS=false;}
+const mem={};
+function dbGet(k,fb){if(useLS){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){}}return (k in mem)?mem[k]:fb;}
+function dbSet(k,v){mem[k]=v;if(useLS){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){useLS=false;}}}
+const KEY='maPOS_v1';
+
+/* ============ seed data ============ */
+const SEED = {"products": [{"code": "T13145", "name": "Curcuma™薑黃膠囊食品(含薑黃素) - 單瓶裝（30份）", "bv": 25, "cost": 1265, "retail": 1775, "cat": "health"}, {"code": "T13039", "name": "愛尚它®莓果配方粉末 - 單瓶裝（90份）", "bv": 46, "cost": 2015, "retail": 2825, "cat": "health"}, {"code": "T13000", "name": "愛尚它®葡萄籽、松樹皮、紅酒萃取精華粉末 - 單瓶裝（90份）", "bv": 43, "cost": 2005, "retail": 2810, "cat": "health"}, {"code": "T13997", "name": "愛尚它®美妍配方粉末 - 單瓶裝(45份)", "bv": 43, "cost": 2180, "retail": 3055, "cat": "health"}, {"code": "T13061", "name": "愛尚它®紅酒酒粕、藍莓、葡萄萃取精華粉末（含白藜蘆醇）", "bv": 28, "cost": 1300, "retail": 1820, "cat": "health"}, {"code": "T13072", "name": "愛尚它®維生素C粉末 - 單瓶裝 (45份)", "bv": 13, "cost": 920, "retail": 1230, "cat": "health"}, {"code": "T10VDC", "name": "循亦暢保健組合 - 含葡萄籽、松樹皮、紅酒萃取精華及薑黃膠囊", "bv": 68, "cost": 3270, "retail": 4585, "cat": "health"}, {"code": "T1160", "name": "維生素C咀嚼錠 - 單瓶裝（60份）", "bv": 5, "cost": 330, "retail": 330, "cat": "health"}, {"code": "T13006", "name": "愛尚它®適明配方粉末 - 單瓶裝（30份）", "bv": 22, "cost": 1115, "retail": 1565, "cat": "health"}, {"code": "T13181", "name": "Prime™女性呵護配方膠囊食品 - 單瓶裝 (30份)", "bv": 20, "cost": 1170, "retail": 1640, "cat": "health"}, {"code": "T14506", "name": "Prime™菸鹼醯胺D-核糖複方凍 - 單盒裝 (30包)", "bv": 25, "cost": 1295, "retail": 1815, "cat": "health"}, {"code": "T14500", "name": "紅藻精華軟膠囊食品(含蝦紅素) - 單瓶裝(30份)", "bv": 24, "cost": 1180, "retail": 1655, "cat": "health"}, {"code": "T13003", "name": "愛尚它®等滲鈣粉末 - 單瓶裝（90份）", "bv": 10, "cost": 655, "retail": 920, "cat": "health"}, {"code": "T13081", "name": "愛尚它®固可寧粉末 - 單瓶裝 (45份)", "bv": 43, "cost": 2135, "retail": 2990, "cat": "health"}, {"code": "T13071", "name": "愛尚它®維生素D3 (含維生素K2)粉末 - 單瓶裝 (30份)", "bv": 14, "cost": 770, "retail": 1080, "cat": "health"}, {"code": "T140JMK", "name": "行動力保健組合 - 含鳳梨酵素、固可寧及易善魚油", "bv": 88, "cost": 5000, "retail": 7000, "cat": "health"}, {"code": "T130DHK", "name": "消化保健組合 - 含益生消化酵素、益生十菌及先進纖維粉", "bv": 57, "cost": 3215, "retail": 4505, "cat": "health"}, {"code": "T6384", "name": "愛尚它®益生消化酵素粉末隨身包–行銷套組–(10組入)", "bv": 30, "cost": 1800, "retail": 2520, "cat": "health"}, {"code": "T13005", "name": "愛尚它®益生消化酵素粉末 - 單瓶裝（90份）", "bv": 19, "cost": 950, "retail": 1330, "cat": "health"}, {"code": "T13024", "name": "愛尚它®益生消化酵素粉末 - 隨身包 - 單盒裝（30包）", "bv": 20, "cost": 1035, "retail": 1450, "cat": "health"}, {"code": "T13273", "name": "nutriclean®先進纖維粉 - 單罐裝 (28份)", "bv": 30, "cost": 1415, "retail": 1985, "cat": "health"}, {"code": "T13285", "name": "益生十菌錠狀食品 - 單瓶裝（30份）", "bv": 21, "cost": 1020, "retail": 1430, "cat": "health"}, {"code": "T1280", "name": "蘆薈汁(原味) - 單瓶裝（944毫升）", "bv": 15, "cost": 800, "retail": 1120, "cat": "health"}, {"code": "T1282", "name": "蘆薈汁（蔓越莓/蘋果口味）- 單瓶裝", "bv": 15, "cost": 800, "retail": 1120, "cat": "health"}, {"code": "T1285", "name": "蘆薈汁（草莓/奇異果口味）- 單瓶裝", "bv": 15, "cost": 800, "retail": 1120, "cat": "health"}, {"code": "T12810", "name": "蘆薈粉 - 原味 - 單盒裝 (16份)", "bv": 15, "cost": 800, "retail": 1120, "cat": "health"}, {"code": "T12860", "name": "蘆薈粉 - 草莓/奇異果口味 - 單盒裝 (16份)", "bv": 15, "cost": 800, "retail": 1120, "cat": "health"}, {"code": "T6604", "name": "Ultimate Aloe®蘆薈粉行銷套組–(10組入)", "bv": 30, "cost": 1800, "retail": 2520, "cat": "health"}, {"code": "T13850", "name": "易善™魚油含維生素E軟膠囊食品 - 單瓶裝 (60份)", "bv": 31, "cost": 1495, "retail": 2095, "cat": "health"}, {"code": "T6704", "name": "易善™好清欣錠狀食品 - 單瓶裝 (60份)", "bv": 29, "cost": 1385, "retail": 1940, "cat": "health"}, {"code": "T13097", "name": "利思捷錠狀食品 - 單瓶裝（30份）", "bv": 24, "cost": 1356, "retail": 1985, "cat": "health"}, {"code": "T13833", "name": "GlutaQ 護力優複方錠狀食品 - 單瓶裝（30份）", "bv": 25, "cost": 1470, "retail": 2060, "cat": "health"}, {"code": "T14505", "name": "愛尚它®紅藻萃取精華粉末 (含蝦紅素) – 隨身包 (30包)", "bv": 25, "cost": 1380, "retail": 1935, "cat": "health"}, {"code": "T13002", "name": "愛尚它®複方維生素B粉末 - 單瓶裝（90份）", "bv": 32, "cost": 1505, "retail": 2110, "cat": "health"}, {"code": "T13007", "name": "愛尚它®輔酵素Q10粉末 - 單瓶裝（30份）", "bv": 31, "cost": 1500, "retail": 2100, "cat": "health"}, {"code": "T6702", "name": "愛尚它益善™舒寧配方粉末食品 - 單盒裝 (30包)", "bv": 23, "cost": 1356, "retail": 1985, "cat": "health"}, {"code": "T6701", "name": "愛尚它益善™女性保健配方粉末食品 - 單盒裝 (30包)", "bv": 42, "cost": 1895, "retail": 2655, "cat": "health"}, {"code": "T6703", "name": "愛尚它益善™活力配方粉末食品 - 單盒裝 (30包)", "bv": 40, "cost": 1860, "retail": 2605, "cat": "health"}, {"code": "T13004", "name": "愛尚它®綜合維生素粉末 - 單瓶裝（90份）", "bv": 29, "cost": 1405, "retail": 1970, "cat": "health"}, {"code": "T14509", "name": "OPC-3® 雙層Q心嚼粒 - 30顆/盒", "bv": 15, "cost": 900, "retail": 1300, "cat": "health"}, {"code": "T6578", "name": "優適保健組合 - 適明配方與紅藻精華", "bv": 40, "cost": 2180, "retail": 3055, "cat": "health"}, {"code": "T13984", "name": "愛尚它®倍護康配方粉末 - 單瓶裝(30份)", "bv": 24, "cost": 1145, "retail": 1605, "cat": "health"}, {"code": "T6459", "name": "愛尚它®每日精選營養組合", "bv": 100, "cost": 5320, "retail": 7465, "cat": "health"}, {"code": "T14140", "name": "愛尚它®樂活蔬果精華粉末 - 單瓶裝 (30份)", "bv": 25, "cost": 1320, "retail": 1850, "cat": "health"}, {"code": "T1055", "name": "愛尚它®等滲鉻粉末 - 單瓶裝(30份)", "bv": 20, "cost": 980, "retail": 1375, "cat": "health"}, {"code": "T13018", "name": "愛尚它®綜合礦物質粉末 - 單瓶裝 (45份)", "bv": 23, "cost": 1140, "retail": 1600, "cat": "health"}, {"code": "T13986", "name": "愛尚它®鳳梨酵素粉末 - 單瓶裝（45份）", "bv": 35, "cost": 1635, "retail": 2290, "cat": "health"}, {"code": "T6496", "name": "愛尚它®每日精選組合隨身包 - 單盒裝 (30包)", "bv": 40, "cost": 1945, "retail": 2725, "cat": "health"}, {"code": "T6103", "name": "薑黃常青保健組合", "bv": 40, "cost": 2080, "retail": 2915, "cat": "health"}, {"code": "T14508", "name": "Prime™鎂力錠 - 120粒（30份）", "bv": 15, "cost": 750, "retail": 1050, "cat": "health"}, {"code": "T14512", "name": "Chucho百歲養生套組", "bv": 111, "cost": 5485, "retail": 7685, "cat": "health"}, {"code": "T14515", "name": "日活夜寧保養計畫 - 日活夜寧雙件組", "bv": 20, "cost": 1215, "retail": 1700, "cat": "health"}, {"code": "T14517", "name": "日活夜寧保養計畫 - D3雙重鎂力三件組", "bv": 28, "cost": 1675, "retail": 2345, "cat": "health"}, {"code": "T6580", "name": "Prime™肌酸牛磺酸粉末 - 單袋裝（30條包）", "bv": 23, "cost": 1150, "retail": 1610, "cat": "health"}, {"code": "T6644", "name": "全新生活™窈調代謝膠囊食品 - 單罐裝（30份）", "bv": 25, "cost": 1482, "retail": 2143, "cat": "health"}, {"code": "T68C3H", "name": "超給力保健三重奏2.0", "bv": 75, "cost": 3820, "retail": 5350, "cat": "health"}, {"code": "T6475", "name": "活力保健組合", "bv": 69, "cost": 4180, "retail": 5865, "cat": "health"}, {"code": "T14507", "name": "Prime™牛初乳粉（含猴頭菇） - 蘋果口味", "bv": 25, "cost": 1270, "retail": 1780, "cat": "health"}, {"code": "T13158", "name": "Prime™男性舒護配方錠狀食品 - 單瓶裝 (30份)", "bv": 28, "cost": 1290, "retail": 1810, "cat": "health"}, {"code": "T13200", "name": "魔妍膠原蛋白粉 - 單盒裝（15份）", "bv": 24, "cost": 1015, "retail": 1425, "cat": "health"}, {"code": "T161", "name": "愛尚它®系列產品簡介（一套10份）", "bv": 0, "cost": 245, "retail": 245, "cat": "health"}, {"code": "T13703", "name": "購物年金™精選清新亮白牙膏", "bv": 4, "cost": 305, "retail": 305, "cat": "health"}, {"code": "T13015", "name": "全新生活™新陳代謝組合", "bv": 52, "cost": 2815, "retail": 3945, "cat": "health"}, {"code": "T13091", "name": "黑種草籽油松樹皮萃取物複方膠囊食品", "bv": 40, "cost": 1840, "retail": 2580, "cat": "health"}, {"code": "T13092", "name": "VivoQuin™魚油加黑種草籽油複方膠囊食品", "bv": 21, "cost": 1262, "retail": 1827, "cat": "health"}, {"code": "T13124", "name": "ZZZ'S晚安好眠雙層錠狀食品 - 單瓶裝（30份）", "bv": 16, "cost": 750, "retail": 1050, "cat": "health"}, {"code": "T13008", "name": "愛尚它®巴西莓配方粉末 - 單瓶裝（45份）", "bv": 30, "cost": 1460, "retail": 2045, "cat": "health"}, {"code": "T6622", "name": "購物年金™精選舒暢草本茶 - 每袋30入茶包", "bv": 7, "cost": 485, "retail": 485, "cat": "health"}, {"code": "T6614", "name": "購物年金™精選綠茶 - 每袋30入茶包 (60克)", "bv": 4, "cost": 310, "retail": 310, "cat": "health"}, {"code": "T30DAY", "name": "全新生活™30天啟動窈窕組合", "bv": 70, "cost": 6450, "retail": 9035, "cat": "health"}, {"code": "T6612", "name": "全新生活™非洲芒果咖啡 - 單盒裝 (15獨立包)", "bv": 22, "cost": 1080, "retail": 1515, "cat": "health"}, {"code": "T6624", "name": "全新生活™辣木葉複方錠狀食品 - 單瓶裝（60份）", "bv": 22, "cost": 1355, "retail": 1900, "cat": "health"}, {"code": "T6461", "name": "全新生活™舒衡配方錠狀食品含南非醉茄根葉萃取物", "bv": 37, "cost": 1750, "retail": 2450, "cat": "health"}, {"code": "T6462", "name": "全新生活™纖盈錠狀食品 - 單瓶裝（60份）", "bv": 41, "cost": 1880, "retail": 2635, "cat": "health"}, {"code": "T6392", "name": "全新生活™窈窕挑戰組合", "bv": 50, "cost": 4015, "retail": 5625, "cat": "health"}, {"code": "T6362", "name": "全新生活™持續窈窕組合 (含巧克力雪克)", "bv": 65, "cost": 4025, "retail": 5640, "cat": "health"}, {"code": "T6364", "name": "全新生活™持續窈窕組合 (含香草雪克)", "bv": 65, "cost": 4025, "retail": 5640, "cat": "health"}, {"code": "T6366", "name": "全新生活™持續窈窕組合 (含雙口味雪克)", "bv": 73, "cost": 5140, "retail": 7205, "cat": "health"}, {"code": "T6610", "name": "全新生活™非洲芒果茶飲 - 單盒裝 (30獨立包)", "bv": 20, "cost": 1120, "retail": 1570, "cat": "health"}, {"code": "T6390", "name": "全新生活™即享雪克 - 濃醇香草口味 - 單罐", "bv": 10, "cost": 1175, "retail": 1645, "cat": "health"}, {"code": "T6391", "name": "全新生活™即享雪克 - 香濃巧克力口味 - 單罐", "bv": 10, "cost": 1175, "retail": 1645, "cat": "health"}, {"code": "T6482", "name": "全新生活™體內環保組", "bv": 54, "cost": 2980, "retail": 4180, "cat": "health"}, {"code": "T6407", "name": "全新生活™綠咖啡豆熱鉻膠囊食品 - 單瓶裝", "bv": 26, "cost": 1480, "retail": 2075, "cat": "health"}, {"code": "T6640", "name": "Tower+™ 303乳清蛋白肌酸粉末 - (法式香草口味)", "bv": 20, "cost": 2740, "retail": 3840, "cat": "health"}, {"code": "T13064", "name": "愛尚它®孕婦綜合維生素粉末 - 單瓶裝（45份）", "bv": 30, "cost": 1435, "retail": 2010, "cat": "health"}, {"code": "T11191", "name": "活采新肌™ 再生活膚精華乳 - 單瓶裝（30毫升）", "bv": 52, "cost": 2220, "retail": 3105, "cat": "antiage"}, {"code": "T12203", "name": "若美芙™淡斑淨白液 - 單瓶裝(30毫升)", "bv": 36, "cost": 1530, "retail": 2145, "cat": "antiage"}, {"code": "T12204", "name": "若美芙™彈力新生精華液 - 單瓶裝(60毫升)", "bv": 50, "cost": 2130, "retail": 2980, "cat": "antiage"}, {"code": "T12212", "name": "若美芙™超導激活精華液 - 單瓶裝(30毫升)", "bv": 63, "cost": 2480, "retail": 3475, "cat": "antiage"}, {"code": "T1252", "name": "維添秀®OPC-3精華乳液 - 4瓶（每瓶7毫升）", "bv": 61, "cost": 3140, "retail": 4395, "cat": "antiage"}, {"code": "T12271", "name": "若美芙™杏仁酸提亮煥膚精華液 - 單瓶裝（30毫升）", "bv": 12, "cost": 605, "retail": 850, "cat": "antiage"}, {"code": "T12243", "name": "若美芙™煥采活力果凍眼膜 - 單罐裝（30組/60片）", "bv": 26, "cost": 1220, "retail": 1710, "cat": "antiage"}, {"code": "T12227", "name": "若美芙™A醇抗皺修護精華乳 - 單瓶裝（30毫升）", "bv": 32, "cost": 1430, "retail": 2000, "cat": "antiage"}, {"code": "T12233", "name": "若美芙™維他命C美白緊緻精華液 - 單瓶裝（30毫升）", "bv": 40, "cost": 1660, "retail": 2325, "cat": "antiage"}, {"code": "T12238", "name": "若美芙™紅妍保濕水凝霜(蝦紅素) - 單罐裝（56公克）", "bv": 35, "cost": 1540, "retail": 2155, "cat": "antiage"}, {"code": "T12241", "name": "若美芙™維他命B3極效舒妍精華 - 單瓶裝（30毫升）", "bv": 25, "cost": 1105, "retail": 1545, "cat": "antiage"}, {"code": "T12253", "name": "若美芙™3重玻尿酸保濕精華 - 單瓶裝（30毫升）", "bv": 23, "cost": 975, "retail": 1365, "cat": "antiage"}, {"code": "T12254", "name": "若美芙™賦活煥顏精華油 - 單瓶裝（30毫升）", "bv": 24, "cost": 1035, "retail": 1450, "cat": "antiage"}, {"code": "T11134", "name": "汀蘭施®複方超值組合 - 含深層潔膚乳、保濕露、潤膚霜", "bv": 60, "cost": 3350, "retail": 4680, "cat": "antiage"}, {"code": "T12257", "name": "若美芙™美白活膚雙效青春露 - 單瓶裝（29.6毫升）", "bv": 14, "cost": 720, "retail": 1010, "cat": "antiage"}, {"code": "T12225", "name": "若美芙™粉晶兩用按摩滾輪 - 單支裝", "bv": 2, "cost": 395, "retail": 550, "cat": "antiage"}, {"code": "T12226", "name": "若美芙™冰肌按摩滾輪 - 單支裝", "bv": 3, "cost": 395, "retail": 550, "cat": "antiage"}, {"code": "T12239", "name": "若美芙™保養刷具組 限時特惠品", "bv": 0, "cost": 700, "retail": 1535, "cat": "antiage"}, {"code": "T16105", "name": "若美芙™男士虎眼石兩用按摩滾輪限量特賣 - 單支裝", "bv": 0, "cost": 295, "retail": 415, "cat": "antiage"}, {"code": "T16106", "name": "若美芙™男士冰肌按摩滾輪 限時特惠品", "bv": 0, "cost": 150, "retail": 150, "cat": "antiage"}, {"code": "T11120", "name": "汀蘭施®酵素深層潔膚乳 - 單瓶裝（198毫升）", "bv": 22, "cost": 1100, "retail": 1540, "cat": "antiage"}, {"code": "T11203", "name": "活采新肌™青春舒顏洗面乳 - 單瓶裝(200毫升)", "bv": 24, "cost": 1095, "retail": 1530, "cat": "antiage"}, {"code": "T16101", "name": "若美芙™清爽潔膚凝膠 - 單管裝（148毫升）", "bv": 12, "cost": 660, "retail": 925, "cat": "antiage"}, {"code": "T11194", "name": "活采新肌™青春亮采眼霜 - 單瓶裝（15公克）", "bv": 38, "cost": 1610, "retail": 2255, "cat": "antiage"}, {"code": "T1255", "name": "維添秀®亮采緊緻眼霜 - 單瓶裝(14.2克)", "bv": 22, "cost": 1245, "retail": 1740, "cat": "antiage"}, {"code": "T12260", "name": "若美芙™青春抗皺生物纖維面膜 - 5片裝", "bv": 17, "cost": 925, "retail": 1295, "cat": "antiage"}, {"code": "T12202", "name": "若美芙™火山泥去角質面膜 - 單支裝(64公克)", "bv": 30, "cost": 1260, "retail": 1765, "cat": "antiage"}, {"code": "T11124", "name": "汀蘭施®緊緻潤膚霜 - 單罐裝（43公克）", "bv": 31, "cost": 1535, "retail": 2145, "cat": "antiage"}, {"code": "T11190", "name": "活采新肌™青春煥膚霜 - 單瓶裝（60毫升）", "bv": 63, "cost": 2680, "retail": 3755, "cat": "antiage"}, {"code": "T1208", "name": "維添秀®維他命C+E肌活保濕修護精華 - 單瓶裝（50毫升）", "bv": 35, "cost": 1650, "retail": 2310, "cat": "antiage"}, {"code": "T12201", "name": "若美芙™密集逆齡霜 - 單罐裝（43公克）", "bv": 35, "cost": 1530, "retail": 2145, "cat": "antiage"}, {"code": "T16100", "name": "若美芙™清新保濕蘆薈霜 - 單管裝（74毫升）", "bv": 13, "cost": 655, "retail": 915, "cat": "antiage"}, {"code": "T12214", "name": "若美芙™極致美白淡斑霜 - 單瓶裝 (28.35克)", "bv": 45, "cost": 1960, "retail": 2745, "cat": "antiage"}, {"code": "T11212", "name": "活采新肌™青春超值組", "bv": 105, "cost": 4610, "retail": 6460, "cat": "antiage"}, {"code": "T12210", "name": "若美芙™亮妍超值組", "bv": 58, "cost": 2780, "retail": 3900, "cat": "antiage"}, {"code": "T12275", "name": "NAD+ 雙件組", "bv": 60, "cost": 2835, "retail": 3970, "cat": "antiage"}, {"code": "T68C3B", "name": "超美力護膚三重奏2.0", "bv": 75, "cost": 3700, "retail": 5180, "cat": "antiage"}, {"code": "T11201", "name": "活采新肌™青春極致防曬乳SPF 50+ - 單支裝(100毫升)", "bv": 25, "cost": 1150, "retail": 1610, "cat": "antiage"}, {"code": "T12235", "name": "若美芙™極致亮白防曬乳SPF50 - 單瓶裝（50公克）", "bv": 31, "cost": 1500, "retail": 2100, "cat": "antiage"}, {"code": "T11122", "name": "汀蘭施®緊膚保濕露 - 單瓶裝（198毫升）", "bv": 21, "cost": 1090, "retail": 1525, "cat": "antiage"}, {"code": "T11200", "name": "活采新肌™青春柔膚露 - 單瓶裝(150毫升)", "bv": 31, "cost": 1385, "retail": 1940, "cat": "antiage"}, {"code": "T12208", "name": "若美芙™亮妍保濕化妝水 - 單瓶裝（198毫升）", "bv": 19, "cost": 905, "retail": 1270, "cat": "antiage"}, {"code": "T12255", "name": "若美芙™活顏保濕噴霧（舒緩爽膚水） - 單瓶裝（32毫升）", "bv": 13, "cost": 630, "retail": 880, "cat": "antiage"}, {"code": "T12264", "name": "若美芙™NAD青春霜 - 單罐裝（40公克）", "bv": 35, "cost": 1540, "retail": 2155, "cat": "antiage"}, {"code": "T6101", "name": "常青配方®膠囊食品 - 單瓶裝(30份)", "bv": 17, "cost": 925, "retail": 1295, "cat": "antiage"}, {"code": "T12205", "name": "若美芙™長效潤澤護手身體霜 - 單瓶裝(193公克)", "bv": 17, "cost": 800, "retail": 1120, "cat": "antiage"}, {"code": "T12258", "name": "若美芙™長效潤澤護手身體霜 - 攜帶型 - 單支 (57公克)", "bv": 5, "cost": 315, "retail": 445, "cat": "antiage"}, {"code": "T12259", "name": "若美芙™長效潤澤護手身體霜 - 攜帶型 - 3支組", "bv": 12, "cost": 780, "retail": 1105, "cat": "antiage"}, {"code": "T12218", "name": "若美芙™雙重淡斑美白組", "bv": 70, "cost": 3140, "retail": 4400, "cat": "antiage"}, {"code": "T11150", "name": "平泰秀®青春配方 - 單管裝（118毫升）", "bv": 50, "cost": 2120, "retail": 2965, "cat": "antiage"}, {"code": "T60PLB", "name": "莫蒂膚®絲絨唇頰蜜 - 珊瑚蜜桃", "bv": 10, "cost": 515, "retail": 720, "cat": "beauty"}, {"code": "T61PLB", "name": "莫蒂膚®絲絨唇頰蜜 - 粉紅石榴", "bv": 10, "cost": 515, "retail": 720, "cat": "beauty"}, {"code": "T62PLB", "name": "莫蒂膚®絲絨唇頰蜜 - 珊瑚粉橘", "bv": 10, "cost": 515, "retail": 720, "cat": "beauty"}, {"code": "T63PLB", "name": "莫蒂膚®絲絨唇頰蜜 - 咖啡無花果", "bv": 10, "cost": 515, "retail": 720, "cat": "beauty"}, {"code": "T60MBB", "name": "莫蒂膚®雙色修容餅 - 01 / 02", "bv": 20, "cost": 1000, "retail": 1400, "cat": "beauty"}, {"code": "T61MBB", "name": "莫蒂膚®雙色修容餅 - 03 / 04", "bv": 20, "cost": 1000, "retail": 1400, "cat": "beauty"}, {"code": "T62MBB", "name": "莫蒂膚®雙色修容餅 - 05 / 06", "bv": 20, "cost": 1000, "retail": 1400, "cat": "beauty"}, {"code": "T604MPL", "name": "莫蒂膚®心醉神迷 4色眼影盤", "bv": 20, "cost": 985, "retail": 1380, "cat": "beauty"}, {"code": "T605MPL", "name": "莫蒂膚®落櫻繽紛4色眼影盤", "bv": 20, "cost": 985, "retail": 1380, "cat": "beauty"}, {"code": "T612MPL", "name": "莫蒂膚®冷色調 12色眼影盤", "bv": 28, "cost": 1330, "retail": 1860, "cat": "beauty"}, {"code": "T60SDS", "name": "莫蒂膚®持久光感眼影筆三件組", "bv": 35, "cost": 1590, "retail": 2225, "cat": "beauty"}, {"code": "T61MBP", "name": "莫蒂膚®超細緻塑形眉筆 - 淺褐色", "bv": 12, "cost": 550, "retail": 770, "cat": "beauty"}, {"code": "T62MBP", "name": "莫蒂膚®超細緻塑形眉筆 - 深褐色", "bv": 12, "cost": 550, "retail": 770, "cat": "beauty"}, {"code": "T27ELP", "name": "莫蒂膚®極致眼線筆 - 時尚黑", "bv": 8, "cost": 455, "retail": 640, "cat": "beauty"}, {"code": "T60GPE", "name": "莫蒂膚®絲滑眼線筆 - 黑色", "bv": 10, "cost": 460, "retail": 645, "cat": "beauty"}, {"code": "T61GPE", "name": "莫蒂膚®絲滑眼線筆 - 咖啡色", "bv": 10, "cost": 460, "retail": 645, "cat": "beauty"}, {"code": "T50LBS", "name": "莫蒂膚®眉睫修護精華液 - 單管裝（4.9毫升）", "bv": 23, "cost": 920, "retail": 1285, "cat": "beauty"}, {"code": "T60CHP", "name": "莫蒂膚®立體打亮修容盤", "bv": 7, "cost": 465, "retail": 650, "cat": "beauty"}, {"code": "T360HDP", "name": "莫蒂膚® HD無瑕定妝蜜粉餅", "bv": 17, "cost": 815, "retail": 1140, "cat": "beauty"}, {"code": "T60SPW", "name": "莫蒂膚®清透柔焦蜜粉 - 光透", "bv": 6, "cost": 415, "retail": 580, "cat": "beauty"}, {"code": "T61SPW", "name": "莫蒂膚®清透柔焦蜜粉 - 淺色", "bv": 6, "cost": 415, "retail": 580, "cat": "beauty"}, {"code": "T301FS", "name": "莫蒂膚®美妍定妝霧 - 單瓶裝 (118毫升)", "bv": 18, "cost": 815, "retail": 1140, "cat": "beauty"}, {"code": "T302MAS", "name": "莫蒂膚®清新定妝霧 - 單瓶裝（118毫升）", "bv": 17.5, "cost": 805, "retail": 1125, "cat": "beauty"}, {"code": "T2404", "name": "莫蒂膚®溫和卸妝棉 - 一包30片", "bv": 3, "cost": 265, "retail": 370, "cat": "beauty"}, {"code": "T60DBC", "name": "莫蒂膚®雙色腮紅 - 暖心柔膚", "bv": 20, "cost": 900, "retail": 1260, "cat": "beauty"}, {"code": "T61DBC", "name": "莫蒂膚®雙色腮紅 - 霓彩雲蹤", "bv": 20, "cost": 900, "retail": 1260, "cat": "beauty"}, {"code": "T60MLL", "name": "莫蒂膚®絲滑唇線筆 - 復古玫瑰", "bv": 10, "cost": 450, "retail": 630, "cat": "beauty"}, {"code": "T61MLL", "name": "莫蒂膚®絲滑唇線筆 - 粉紅拿鐵", "bv": 10, "cost": 450, "retail": 630, "cat": "beauty"}, {"code": "T62MLL", "name": "莫蒂膚®絲滑唇線筆 - 肉桂焦糖", "bv": 10, "cost": 450, "retail": 630, "cat": "beauty"}, {"code": "T60MTG", "name": "莫蒂膚®琉璃光唇蜜 - 透明糖衣", "bv": 12, "cost": 605, "retail": 850, "cat": "beauty"}, {"code": "T60MTGSP", "name": "莫蒂膚®琉璃光唇蜜 - 透明糖衣 限時特惠品", "bv": 0, "cost": 150, "retail": 150, "cat": "beauty"}, {"code": "T61MTG", "name": "莫蒂膚®琉璃光唇蜜 - 水潤草莓", "bv": 12, "cost": 605, "retail": 850, "cat": "beauty"}, {"code": "T61MTGSP", "name": "莫蒂膚®琉璃光唇蜜 - 水潤草莓 限時特惠品", "bv": 0, "cost": 150, "retail": 150, "cat": "beauty"}, {"code": "T62MTG", "name": "莫蒂膚®琉璃光唇蜜 - 蜜橙雪酪", "bv": 12, "cost": 605, "retail": 850, "cat": "beauty"}, {"code": "T63MTG", "name": "莫蒂膚®琉璃光唇蜜 - 蜂蜜糖霜", "bv": 12, "cost": 605, "retail": 850, "cat": "beauty"}, {"code": "T64MTG", "name": "莫蒂膚®琉璃光唇蜜 - 粉紅糖霜", "bv": 12, "cost": 605, "retail": 850, "cat": "beauty"}, {"code": "T41MVITE", "name": "莫蒂膚®維生素E護唇膏 - 單支裝", "bv": 11, "cost": 520, "retail": 730, "cat": "beauty"}, {"code": "T60LPS", "name": "莫蒂膚®絲絨亮澤唇膏 - 玫瑰紅木", "bv": 8, "cost": 420, "retail": 590, "cat": "beauty"}, {"code": "T61LPS", "name": "莫蒂膚®絲絨亮澤唇膏 - 櫻桃可樂", "bv": 8, "cost": 420, "retail": 590, "cat": "beauty"}, {"code": "T62LPS", "name": "莫蒂膚®絲絨亮澤唇膏 - 赤陶暖紅", "bv": 8, "cost": 420, "retail": 590, "cat": "beauty"}, {"code": "T63LPS", "name": "莫蒂膚®絲絨亮澤唇膏 - 茶語醇香", "bv": 8, "cost": 420, "retail": 590, "cat": "beauty"}, {"code": "T27MBR", "name": "莫蒂膚®眼妝刷具7件組 限時特惠品", "bv": 0, "cost": 500, "retail": 1525, "cat": "beauty"}, {"code": "T6930", "name": "愛的奇蹟™嬰兒保濕乳 - 單瓶裝 (190克)", "bv": 6, "cost": 435, "retail": 610, "cat": "baby"}, {"code": "T6932", "name": "愛的奇蹟™嬰兒洗髮沐浴泡泡 - 單瓶裝 (250毫升)", "bv": 5, "cost": 385, "retail": 540, "cat": "baby"}, {"code": "T6931", "name": "愛的奇蹟™嬰兒安膚霜 - 單瓶裝 (113克)", "bv": 8, "cost": 450, "retail": 630, "cat": "baby"}, {"code": "T6956", "name": "愛的奇蹟™兒童三合一洗髮沐浴露 - 單瓶裝 (444毫升)", "bv": 7, "cost": 505, "retail": 705, "cat": "baby"}, {"code": "T6934", "name": "愛的奇蹟™嬰兒護膚超值組", "bv": 17, "cost": 1140, "retail": 1600, "cat": "baby"}, {"code": "T6942", "name": "愛的奇蹟™兒童倍護康粉末（含酵母葡聚多醣體）", "bv": 10, "cost": 650, "retail": 910, "cat": "baby"}, {"code": "T6902", "name": "愛的奇蹟™兒童益生菌嚼片 - 單瓶裝(30份)", "bv": 18, "cost": 940, "retail": 1320, "cat": "baby"}, {"code": "T6936", "name": "愛的奇蹟™兒童多維素粉末 - 單瓶裝(45份)", "bv": 13, "cost": 900, "retail": 1260, "cat": "baby"}, {"code": "T12546", "name": "Fixx™沛絲 - 錠狀食品 - 單罐裝（30份）", "bv": 27, "cost": 1356, "retail": 1985, "cat": "fixx"}, {"code": "T12547", "name": "Fixx™沛絲 - 護髮精華液 - 單瓶裝（30毫升）", "bv": 25, "cost": 1185, "retail": 1905, "cat": "fixx"}, {"code": "T12548", "name": "Fixx™沛絲 - 雙件組 (錠狀食品與護髮精華液)", "bv": 52, "cost": 2541, "retail": 3890, "cat": "fixx"}, {"code": "T12540", "name": "fixx®摩洛哥堅果油潤髮乳 - 單瓶裝(237毫升)", "bv": 11, "cost": 550, "retail": 770, "cat": "fixx"}, {"code": "T12544", "name": "Fixx®水潤護髮膜 - 單罐裝（118毫升）", "bv": 12, "cost": 565, "retail": 790, "cat": "fixx"}, {"code": "T12541", "name": "fixx®摩洛哥堅果油洗髮乳 - 單瓶裝(237毫升)", "bv": 11, "cost": 550, "retail": 770, "cat": "fixx"}, {"code": "T12543", "name": "Fixx®水亮順髮精華油 - 單管裝（59毫升）", "bv": 9, "cost": 465, "retail": 650, "cat": "fixx"}, {"code": "T12542", "name": "fixx®健髮雙效洗髮乳 - 單瓶裝(237毫升)", "bv": 11, "cost": 550, "retail": 770, "cat": "fixx"}, {"code": "T6202", "name": "美安威淨®蘆薈洗碗精 - 單瓶裝（946毫升）", "bv": 6, "cost": 325, "retail": 325, "cat": "home"}, {"code": "T6217", "name": "購物年金™美安威淨®多功能魔拭亮潔布 - 單包裝（6片）", "bv": 16, "cost": 1075, "retail": 1075, "cat": "home"}, {"code": "T6206", "name": "美安威淨®萬用濃縮清潔劑 - 單瓶裝（946毫升)", "bv": 6, "cost": 335, "retail": 335, "cat": "home"}, {"code": "T6223", "name": "美安威淨®家潔組", "bv": 26, "cost": 1540, "retail": 1540, "cat": "home"}, {"code": "T6207", "name": "購物年金™美安威淨®強效清潔劑 - 單瓶裝（946毫升）", "bv": 6, "cost": 325, "retail": 325, "cat": "home"}, {"code": "T6211", "name": "購物年金™美安威淨®深層去污清潔劑 - 單瓶裝（946毫升)", "bv": 6, "cost": 335, "retail": 335, "cat": "home"}, {"code": "T6230", "name": "購物年金™美安威淨®洗衣易潔包 — 清新配方 - 單罐 (24包裝)", "bv": 6, "cost": 465, "retail": 465, "cat": "home"}, {"code": "T6204", "name": "美安威淨®衣物柔軟精 - 單瓶裝（1公升）", "bv": 5.5, "cost": 360, "retail": 360, "cat": "home"}, {"code": "T6200", "name": "美安威淨® 4X強力酵素高效洗衣精 - 單瓶裝 (1公升)", "bv": 6, "cost": 370, "retail": 370, "cat": "home"}, {"code": "T6527", "name": "購物年金™美安威淨®去味除漬噴霧 - 清新配方 - 單瓶裝", "bv": 4, "cost": 285, "retail": 285, "cat": "home"}, {"code": "T12012", "name": "柔雅™柔膚沐浴露 - 單瓶裝（473毫升）", "bv": 6, "cost": 525, "retail": 735, "cat": "personal"}, {"code": "T2704IBV", "name": "樂優選™ 亮白漱口水 - 單瓶裝（473毫升）(IBV)", "bv": 0, "cost": 310, "retail": 310, "cat": "personal"}, {"code": "T1410", "name": "購物年金™精選紫錐菊複方膠囊食品 - 單瓶裝（30份）", "bv": 16, "cost": 730, "retail": 730, "cat": "personal"}, {"code": "T13703IBV", "name": "購物年金™精選清新亮白牙膏 - 單支裝（141克）(IBV)", "bv": 0, "cost": 305, "retail": 305, "cat": "personal"}, {"code": "T12015", "name": "柔雅™蛋白質護髮乳 - 單瓶裝（473毫升）", "bv": 8, "cost": 540, "retail": 755, "cat": "personal"}, {"code": "T12003", "name": "柔雅™甘菊洗髮精 - 單瓶裝（473毫升）", "bv": 8, "cost": 525, "retail": 735, "cat": "personal"}, {"code": "T12006", "name": "柔雅™滋潤洗髮乳（適合燙染受損髮質） - 單瓶裝（473毫升）", "bv": 8, "cost": 510, "retail": 715, "cat": "personal"}, {"code": "T1401", "name": "購物年金™精選植萃洗手乳 - 鼠尾草/萊姆（236毫升）", "bv": 4, "cost": 300, "retail": 300, "cat": "personal"}, {"code": "T6582", "name": "Tower+™舒緩修護鎂噴霧 - 單瓶裝（100毫升）", "bv": 10, "cost": 575, "retail": 805, "cat": "personal"}, {"code": "T22080", "name": "購物年金™精選瞬淨男士刮鬍刀組 - 含1支刀架+2片刀面", "bv": 3, "cost": 270, "retail": 270, "cat": "personal"}, {"code": "T22081", "name": "購物年金™精選瞬淨男士刮鬍刀補充包 - 内含4個刀面", "bv": 4, "cost": 270, "retail": 270, "cat": "personal"}, {"code": "T22082", "name": "購物年金™精選瞬淨拋棄式男士刮鬍刀 - 内含3入", "bv": 3, "cost": 220, "retail": 220, "cat": "personal"}, {"code": "T22083", "name": "購物年金™精選瞬淨拋棄式仕女除毛刀 - 内含3入", "bv": 3, "cost": 220, "retail": 220, "cat": "personal"}, {"code": "T2406", "name": "樂優選™濕式衛生紙 - 3包裝,每包50張", "bv": 3, "cost": 265, "retail": 265, "cat": "personal"}, {"code": "T1014", "name": "絲晶™肌膚修護精華液 - 單瓶裝（30毫升）", "bv": 18, "cost": 1025, "retail": 1435, "cat": "personal"}, {"code": "T1016", "name": "絲晶™深層潔膚乳 - 單瓶裝（240毫升）", "bv": 9, "cost": 590, "retail": 825, "cat": "personal"}, {"code": "T12601", "name": "絲晶™旅行隨身組 - 五件組", "bv": 15, "cost": 1310, "retail": 1830, "cat": "personal"}, {"code": "T1015", "name": "絲晶™煥采緊緻面膜 - 單瓶裝（120毫升）", "bv": 11, "cost": 710, "retail": 990, "cat": "personal"}, {"code": "T1013", "name": "絲晶™鎖水保濕乳 - 單瓶裝（118毫升）", "bv": 12, "cost": 705, "retail": 985, "cat": "personal"}, {"code": "T1275", "name": "絲晶™果酸活膚乳液 - 單瓶裝（120毫升）", "bv": 23, "cost": 1215, "retail": 1700, "cat": "personal"}, {"code": "T1012", "name": "絲晶™爽膚平衡化妝水 - 單瓶裝（240毫升）", "bv": 8, "cost": 550, "retail": 770, "cat": "personal"}, {"code": "T1070", "name": "Ultimate Aloe®蘆薈膠 - 單瓶裝(118毫升)", "bv": 9, "cost": 580, "retail": 800, "cat": "personal"}], "cats": [{"id": "health", "name": "健康・營養・食品"}, {"id": "antiage", "name": "抗衰老"}, {"id": "beauty", "name": "美容・化妝・保養品"}, {"id": "baby", "name": "愛的奇蹟"}, {"id": "fixx", "name": "Fixx"}, {"id": "home", "name": "家居・園藝"}, {"id": "personal", "name": "個人保養"}]};
+
+/* ============ state ============ */
+let S = dbGet(KEY, null);
+if(!S){ S = {products:SEED.products, cats:SEED.cats, members:[], txns:[], settings:{store:'美安台灣 POS',tag:'sky',logo:''}}; }
+// safety defaults
+S.settings = Object.assign({store:'美安台灣 POS',tag:'sky',logo:''}, S.settings||{});
+function save(){ dbSet(KEY,S); }
+
+let cart={items:[],pmode:'retail'};
+let curTxn=null, editProdCode=null;
+
+/* ============ helpers ============ */
+const $=id=>document.getElementById(id);
+const money=n=>'NT$'+Math.round(n).toLocaleString('en-US');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function catName(id){const c=S.cats.find(c=>c.id===id);return c?c.name:'未分類';}
+
+/* ============ nav ============ */
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  $('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  if(v==='members')renderMembers();
+  if(v==='cats')renderCats();
+  if(v==='records')renderRecords();
+}
+
+/* ============ POS ============ */
+let activeCat='all';
+function renderChips(){
+  let h='<button class="chip '+(activeCat==='all'?'active':'')+'" onclick="setCat(\'all\')">全部</button>';
+  S.cats.forEach(c=>{ h+='<button class="chip '+(activeCat===c.id?'active':'')+'" onclick="setCat(\''+c.id+'\')">'+esc(c.name)+'</button>'; });
+  $('chips').innerHTML=h;
+}
+function setCat(id){activeCat=id;renderChips();renderGrid();}
+function setPmode(m){cart.pmode=m;$('pmRetail').classList.toggle('on',m==='retail');$('pmCost').classList.toggle('on',m==='cost');
+  cart.items.forEach(it=>{if(!it.manual){const p=S.products.find(p=>p.code===it.code);if(p)it.price=(m==='cost'?p.cost:p.retail);}});
+  renderCart();renderGrid();}
+function renderGrid(){
+  const q=($('search').value||'').trim().toLowerCase();
+  let list=S.products.filter(p=> (activeCat==='all'||p.cat===activeCat)
+    && (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)));
+  const order={}; S.cats.forEach((c,i)=>order[c.id]=i);
+  list.sort((a,b)=>(order[a.cat]??99)-(order[b.cat]??99));
+  if(!list.length){$('grid').innerHTML='<div class="empty">找不到符合的產品</div>';return;}
+  $('grid').innerHTML=list.map(p=>`
+    <button class="card" onclick="addToCart('${p.code}')">
+      <span class="edit" onclick="event.stopPropagation();editProduct('${p.code}')"><svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M14 6l4 4"/></svg></span>
+      <span class="nm">${esc(p.name)}</span>
+      <span class="price mono">${money(cart.pmode==='cost'?p.cost:p.retail)}</span>
+      <span class="bv-pill">BV ${p.bv}</span>
+    </button>`).join('');
+}
+function addToCart(code){
+  const p=S.products.find(p=>p.code===code);if(!p)return;
+  const wasEmpty=!cart.items.length;
+  const ex=cart.items.find(i=>i.code===code);
+  if(ex){ex.qty++;}
+  else cart.items.push({code:p.code,name:p.name,bv:p.bv,price:(cart.pmode==='cost'?p.cost:p.retail),qty:1,manual:false});
+  renderCart();
+  if(wasEmpty)openDrawer();
+}
+function openDrawer(){$('cartDrawer').classList.add('open');$('drawerOverlay').classList.add('open');}
+function closeDrawer(){$('cartDrawer').classList.remove('open');$('drawerOverlay').classList.remove('open');}
+function renderCart(){
+  const count=cart.items.reduce((s,i)=>s+i.qty,0);
+  const bv=cart.items.reduce((s,i)=>s+i.bv*i.qty,0);
+  const grand=cart.items.reduce((s,i)=>s+i.price*i.qty,0);
+  // update FAB
+  const fab=$('fab');
+  $('fabBadge').textContent=count;
+  $('fabBadge').style.display=count?'grid':'none';
+  $('fabTotal').textContent=money(grand);
+  fab.classList.toggle('empty-cart',!count);
+  // drawer items
+  const box=$('cartItems');
+  if(!cart.items.length){
+    box.innerHTML=`<div class="cart-empty-msg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div>尚無商品<br>點選產品加入購物車</div></div>`;
+  } else {
+    box.innerHTML=cart.items.map((it,idx)=>`
+      <div class="line">
+        <div class="li-nm">
+          <div class="c mono">${esc(it.code)}</div>
+          <div class="t">${esc(it.name)}</div>
+          <div class="li-price">NT$<input class="mono" type="number" value="${it.price}" onchange="setPrice(${idx},this.value)"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div class="qty">
+            <button class="qbtn" onclick="chQty(${idx},-1)">−</button>
+            <span class="qn mono">${it.qty}</span>
+            <button class="qbtn" onclick="chQty(${idx},1)">+</button>
+          </div>
+          <div class="li-sub mono">${money(it.price*it.qty)}</div>
+          <button class="li-rm" onclick="rmLine(${idx})">移除</button>
+        </div>
+      </div>`).join('');
+  }
+  $('tCount').textContent=count;$('tBV').textContent=bv.toLocaleString();$('tGrand').textContent=money(grand);
+  $('checkoutBtn').disabled=!cart.items.length;
+}
+function setPrice(i,v){cart.items[i].price=Math.max(0,Number(v)||0);cart.items[i].manual=true;renderCart();}
+function chQty(i,d){cart.items[i].qty+=d;if(cart.items[i].qty<=0)cart.items.splice(i,1);renderCart();}
+function rmLine(i){cart.items.splice(i,1);renderCart();}
+/* ============ confirm helper (replaces window.confirm/prompt for Safari) ============ */
+let _confirmCb=null;
+function showConfirm(msg,sub,okLabel,cb){
+  $('confirmMsg').textContent=msg;
+  $('confirmSub').textContent=sub||'';
+  $('confirmOkBtn').textContent=okLabel||'確定';
+  $('confirmOkBtn').onclick=()=>{closeMask('confirmMask');if(cb)cb();};
+  openMask('confirmMask');
+}
+
+function clearCart(){
+  if(!cart.items.length)return;
+  showConfirm('確定清空購物車？','此操作無法復原','清空',()=>{
+    cart.items=[];$('cartNote').value='';renderCart();closeDrawer();
+  });
+}
+function checkout(){
+  if(!cart.items.length)return;
+  const mid=$('cartMember').value;
+  const m=S.members.find(x=>x.id===mid);
+  const txn={
+    id:uid(), date:new Date().toISOString(),
+    memberId:mid||'', memberName: m?m.name:'散客',
+    items:cart.items.map(i=>({code:i.code,name:i.name,bv:i.bv,price:i.price,qty:i.qty})),
+    note:$('cartNote').value.trim(),
+    total:cart.items.reduce((s,i)=>s+i.price*i.qty,0),
+    bv:cart.items.reduce((s,i)=>s+i.bv*i.qty,0)
+  };
+  S.txns.unshift(txn);save();
+  cart.items=[];$('cartNote').value='';renderCart();
+  closeDrawer();
+  toast('結帳完成 · '+money(txn.total));
+  openTxn(txn,false);
+}
+
+/* ============ product edit ============ */
+function openAddProduct(){
+  editProdCode=null;
+  $('prodModalTitle').textContent='新增產品';
+  $('prodDelBtn').style.display='none';
+  $('epCode').value='';$('epCode').disabled=false;
+  $('epName').value='';$('epBV').value='';$('epCost').value='';$('epRetail').value='';
+  $('epCat').innerHTML=S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  openMask('prodMask');setTimeout(()=>$('epCode').focus(),100);
+}
+function editProduct(code){
+  const p=S.products.find(p=>p.code===code);if(!p)return;editProdCode=code;
+  $('prodModalTitle').textContent='編輯產品';
+  $('prodDelBtn').style.display='inline-block';
+  $('epCode').value=p.code;$('epCode').disabled=true;
+  $('epName').value=p.name;$('epBV').value=p.bv;$('epCost').value=p.cost;$('epRetail').value=p.retail;
+  $('epCat').innerHTML=S.cats.map(c=>`<option value="${c.id}" ${c.id===p.cat?'selected':''}>${esc(c.name)}</option>`).join('');
+  openMask('prodMask');
+}
+function saveProduct(){
+  const name=$('epName').value.trim();
+  if(!name){toast('請輸入品名');return;}
+  if(editProdCode){
+    // edit mode
+    const p=S.products.find(p=>p.code===editProdCode);if(!p)return;
+    p.name=name;p.cat=$('epCat').value;
+    p.bv=Number($('epBV').value)||0;p.cost=Number($('epCost').value)||0;p.retail=Number($('epRetail').value)||0;
+    save();closeMask('prodMask');renderChips();renderGrid();toast('已更新產品');
+  } else {
+    // add mode
+    const code=$('epCode').value.trim();
+    if(!code){toast('請輸入產品代號');return;}
+    if(S.products.find(p=>p.code===code)){toast('代號已存在，請換一個');return;}
+    S.products.push({
+      code,name,cat:$('epCat').value,
+      bv:Number($('epBV').value)||0,
+      cost:Number($('epCost').value)||0,
+      retail:Number($('epRetail').value)||0
+    });
+    save();closeMask('prodMask');renderChips();renderGrid();toast('已新增產品：'+name);
+  }
+}
+function deleteProduct(){
+  showConfirm('確定刪除此產品？','此操作無法復原','刪除',()=>{
+    S.products=S.products.filter(p=>p.code!==editProdCode);save();closeMask('prodMask');renderGrid();toast('已刪除產品');
+  });
+}
+
+/* ============ members ============ */
+function openMemberModal(id){
+  const m=id?S.members.find(x=>x.id===id):null;
+  $('memberModalTitle').textContent=m?'編輯會員':'新增會員';
+  $('mName').value=m?m.name:'';
+  $('mPhone').value=m?(m.phone||''):'';
+  $('mNote').value=m?(m.note||''):'';
+  $('mEditId').value=m?m.id:'';
+  openMask('memberMask');
+  setTimeout(()=>$('mName').focus(),100);
+}
+function renderMembers(){
+  fillMemberSelects();
+  $('memCount').textContent='共 '+S.members.length+' 位';
+  if(!S.members.length){$('memBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">尚無會員，點右上角「＋ 新增會員」</td></tr>';return;}
+  $('memBody').innerHTML=S.members.map(m=>{
+    const ts=S.txns.filter(t=>t.memberId===m.id);
+    const tot=ts.reduce((s,t)=>s+t.total,0);
+    return `<tr>
+      <td><b>${esc(m.name)}</b></td>
+      <td class="mono">${esc(m.phone||'—')}</td>
+      <td style="max-width:160px;color:var(--muted);font-size:13px">${esc(m.note||'—')}</td>
+      <td class="mono">${ts.length}</td>
+      <td class="mono">${money(tot)}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="mini" onclick="viewMemberTxns('${m.id}')">消費</button>
+        <button class="mini gray" onclick="openMemberModal('${m.id}')">編輯</button>
+        <button class="mini red" onclick="delMember('${m.id}')">刪除</button>
+      </td></tr>`;
+  }).join('');
+}
+function saveMember(){
+  const name=$('mName').value.trim();if(!name){toast('請輸入姓名');return;}
+  const id=$('mEditId').value;
+  if(id){const m=S.members.find(x=>x.id===id);m.name=name;m.phone=$('mPhone').value.trim();m.note=$('mNote').value.trim();}
+  else S.members.push({id:uid(),name,phone:$('mPhone').value.trim(),note:$('mNote').value.trim(),created:new Date().toISOString()});
+  save();closeMask('memberMask');renderMembers();toast(id?'已更新會員':'已新增會員：'+name);
+}
+function delMember(id){
+  showConfirm('確定刪除此會員？','消費記錄會保留，會員欄改為散客','刪除',()=>{
+    S.members=S.members.filter(x=>x.id!==id);
+    S.txns.forEach(t=>{if(t.memberId===id){t.memberId='';t.memberName+='（已刪除）';}});
+    save();renderMembers();
+  });
+}
+function fillMemberSelects(){
+  const opt='<option value="">— 散客 —</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}${m.phone?' · '+esc(m.phone):''}</option>`).join('');
+  $('cartMember').innerHTML=opt;
+  $('fMember').innerHTML='<option value="">全部會員</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+}
+function viewMemberTxns(id){$('fMember').value=id;go('records');renderRecords();}
+
+/* ============ categories ============ */
+
+function renderCats(){
+  const counts={};S.products.forEach(p=>counts[p.cat]=(counts[p.cat]||0)+1);
+  $('catList').innerHTML=S.cats.map((c,i)=>`
+    <li class="cat-item" data-id="${c.id}">
+      <div class="cat-order">
+        <button class="ord-btn" onclick="moveCat(${i},-1)" ${i===0?'disabled':''} title="往上">
+          <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        </button>
+        <button class="ord-btn" onclick="moveCat(${i},1)" ${i===S.cats.length-1?'disabled':''} title="往下">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <input value="${esc(c.name)}" onchange="renameCat('${c.id}',this.value)">
+      <span class="cat-count">${counts[c.id]||0} 項</span>
+      <button class="mini red" onclick="delCat('${c.id}')">刪除</button>
+    </li>`).join('');
+  const cur=$('catFilter').value;
+  $('catFilter').innerHTML='<option value="all">全部產品</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  $('catFilter').value=cur;
+  renderProdCatList();
+}
+function moveCat(i,dir){
+  const j=i+dir;
+  if(j<0||j>=S.cats.length)return;
+  [S.cats[i],S.cats[j]]=[S.cats[j],S.cats[i]];
+  save();renderCats();renderChips();renderGrid();
+}
+function renderProdCatList(){
+  const cf=$('catFilter').value;
+  const q=($('catProdSearch').value||'').trim().toLowerCase();
+  const list=S.products.filter(p=>(cf==='all'||p.cat===cf)&&(!q||p.name.toLowerCase().includes(q)||p.code.toLowerCase().includes(q)));
+  const catOpts=S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  if(!list.length){$('prodCatBody').innerHTML=`<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px">無符合產品</td></tr>`;return;}
+  $('prodCatBody').innerHTML=list.map(p=>`
+    <tr>
+      <td style="font-size:13px;font-weight:500;max-width:240px">${esc(p.name)}</td>
+      <td class="mono" style="font-size:11px;color:var(--accent);white-space:nowrap">${esc(p.code)}</td>
+      <td>
+        <select onchange="changeProdCat('${p.code}',this.value)" style="width:100%;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#faf8f2;font-size:13px">
+          ${S.cats.map(c=>`<option value="${c.id}" ${c.id===p.cat?'selected':''}>${esc(c.name)}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`).join('');
+}
+function changeProdCat(code,catId){
+  const p=S.products.find(p=>p.code===code);if(!p)return;
+  p.cat=catId;save();
+  const counts={};S.products.forEach(p=>counts[p.cat]=(counts[p.cat]||0)+1);
+  $('catList').querySelectorAll('.cat-item').forEach(li=>{
+    const sp=li.querySelector('.cat-count');if(sp)sp.textContent=(counts[li.dataset.id]||0)+' 項';
+  });
+  renderGrid();
+}
+function renameCat(id,v){const c=S.cats.find(c=>c.id===id);if(c){c.name=v.trim()||c.name;save();renderChips();}}
+function openAddCatModal(){
+  $('newCatName').value='';
+  openMask('addCatMask');
+  setTimeout(()=>$('newCatName').focus(),100);
+}
+function addCat(){
+  const name=($('newCatName').value||'').trim();
+  if(!name){toast('請輸入分類名稱');$('newCatName').focus();return;}
+  S.cats.push({id:uid(),name});
+  $('newCatName').value='';
+  closeMask('addCatMask');
+  save();renderCats();renderChips();toast('已新增分類：'+name);
+}
+function delCat(id){
+  const cnt=S.products.filter(p=>p.cat===id).length;
+  showConfirm('刪除「'+catName(id)+'」分類？', cnt>0?'底下 '+cnt+' 項產品將移到「未分類」':'','刪除',()=>{
+    S.products.forEach(p=>{if(p.cat===id)p.cat='__none';});
+    S.cats=S.cats.filter(c=>c.id!==id);
+    if(cnt>0&&!S.cats.find(c=>c.id==='__none'))S.cats.push({id:'__none',name:'未分類'});
+    save();renderCats();renderChips();renderGrid();
+  });
+}
+
+/* ============ records ============ */
+function renderRecords(){
+  const mid=$('fMember').value, from=$('fFrom').value, to=$('fTo').value;
+  let list=S.txns.filter(t=>{
+    if(mid&&t.memberId!==mid)return false;
+    const d=t.date.slice(0,10);
+    if(from&&d<from)return false;
+    if(to&&d>to)return false;
+    return true;
+  });
+  const rev=list.reduce((s,t)=>s+t.total,0);
+  const bv=list.reduce((s,t)=>s+t.bv,0);
+  const qty=list.reduce((s,t)=>s+t.items.reduce((a,i)=>a+i.qty,0),0);
+
+  // 零售價差分析
+  let totalSpread=0, totalProfit=0;
+  const catSpread={};
+  list.forEach(t=>t.items.forEach(i=>{
+    const p=S.products.find(x=>x.code===i.code);
+    if(!p)return;
+    const spread=(p.retail-p.cost)*i.qty;
+    const profit=(i.price-p.cost)*i.qty;
+    totalSpread+=spread; totalProfit+=profit;
+    catSpread[p.cat]=(catSpread[p.cat]||{spread:0,profit:0,qty:0});
+    catSpread[p.cat].spread+=spread;
+    catSpread[p.cat].profit+=profit;
+    catSpread[p.cat].qty+=i.qty;
+  }));
+  const profitRate=rev>0?((totalProfit/rev)*100).toFixed(1):0;
+
+  $('statGrid').innerHTML=`
+    <div class="stat"><div class="k">交易筆數</div><div class="v mono">${list.length}</div></div>
+    <div class="stat"><div class="k">總營業額</div><div class="v mono">${money(rev)}</div></div>
+    <div class="stat"><div class="k">總 BV</div><div class="v mono">${bv.toLocaleString()}</div></div>
+    <div class="stat"><div class="k">售出件數</div><div class="v mono">${qty}</div></div>
+    <div class="stat" style="border-color:#d0e8d8"><div class="k" style="color:#2f8f5b">零售價差（潛在利潤）</div><div class="v mono" style="color:#2f8f5b">${money(totalSpread)}</div></div>
+    <div class="stat" style="border-color:#c8dff8"><div class="k" style="color:#1a6abf">實際利潤</div><div class="v mono" style="color:#1a6abf">${money(totalProfit)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">利潤率 ${profitRate}%</div></div>`;
+
+  // 分類價差分析
+  const catRows=Object.entries(catSpread).sort((a,b)=>b[1].spread-a[1].spread).map(([id,v])=>`
+    <tr>
+      <td style="font-weight:600">${esc(catName(id))}</td>
+      <td class="mono" style="text-align:right">${v.qty}</td>
+      <td class="mono" style="text-align:right;color:#2f8f5b">${money(v.spread)}</td>
+      <td class="mono" style="text-align:right;color:#1a6abf">${money(v.profit)}</td>
+      <td class="mono" style="text-align:right;color:var(--muted)">${v.spread>0?((v.profit/v.spread)*100).toFixed(0)+'%':'—'}</td>
+    </tr>`).join('');
+  $('spreadTable').innerHTML=catRows||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">無資料</td></tr>';
+
+  if(!list.length){$('recBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">查無消費記錄</td></tr>';return;}
+  $('recBody').innerHTML=list.map(t=>{
+    const d=new Date(t.date);
+    const ds=d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const first=t.items[0]?t.items[0].name:'';
+    const more=t.items.length>1?' 等 '+t.items.length+' 項':'';
+    let txnProfit=0;
+    t.items.forEach(i=>{const p=S.products.find(x=>x.code===i.code);if(p)txnProfit+=(i.price-p.cost)*i.qty;});
+    return `<tr class="clk" onclick="openTxnById('${t.id}')">
+      <td class="mono" style="white-space:nowrap">${ds}</td>
+      <td>${esc(t.memberName)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(first)}${more}</td>
+      <td class="mono">${t.items.reduce((a,i)=>a+i.qty,0)}</td>
+      <td class="mono">${t.bv}</td>
+      <td class="mono"><b>${money(t.total)}</b></td>
+      <td class="mono" style="color:#1a6abf">${money(txnProfit)}</td>
+      <td style="text-align:right"><span class="tag">明細</span></td></tr>`;
+  }).join('');
+}
+
+/* ============ receipt / detail ============ */
+function openTxnById(id){const t=S.txns.find(x=>x.id===id);if(t)openTxn(t,true);}
+function openTxn(t,allowDelete){
+  curTxn=t;
+  $('recModalTitle').textContent='消費明細 · '+t.memberName;
+  $('recDelBtn').style.display=allowDelete?'inline-block':'none';
+  hideDelConfirm();
+  $('receiptHost').innerHTML=buildReceiptHTML(t);
+  openMask('recMask');
+}
+function showDelConfirm(){$('recFootNormal').style.display='none';$('recFootConfirm').style.display='flex';}
+function hideDelConfirm(){$('recFootNormal').style.display='flex';$('recFootConfirm').style.display='none';}
+function buildReceiptHTML(t){
+  const d=new Date(t.date);
+  const ds=d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  const logo=S.settings.logo?`<img src="${S.settings.logo}">`:'sky';
+  const rows=t.items.map(i=>`<tr><td>${esc(i.name)}<div style="color:#b48a3d;font-size:10px" class="mono">${esc(i.code)}</div></td>
+    <td class="mono" style="text-align:center">${i.qty}</td>
+    <td class="mono" style="text-align:right">${money(i.price)}</td>
+    <td class="mono" style="text-align:right">${money(i.price*i.qty)}</td></tr>`).join('');
+  return `<div class="receipt" id="receiptEl">
+    <div class="rc-top"><div class="rc-logo">${logo}</div>
+      <div><div class="rc-store">${esc(S.settings.store)}</div><div class="rc-tag">${esc(S.settings.tag)}</div></div></div>
+    <div class="rc-title">消 費 明 細</div>
+    <div class="rc-meta"><span>會員：${esc(t.memberName)}</span><span class="mono">${ds}</span></div>
+    <table><thead><tr><th style="text-align:left">品項</th><th style="text-align:center">數量</th><th style="text-align:right">單價</th><th style="text-align:right">小計</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    <div class="rc-tot">
+      <div class="r"><span>總件數</span><span class="mono">${t.items.reduce((a,i)=>a+i.qty,0)}</span></div>
+      <div class="r"><span>總 BV</span><span class="mono">${t.bv}</span></div>
+      <div class="g"><span>合計</span><span class="mono">${money(t.total)}</span></div>
+    </div>
+    ${t.note?'<div class="rc-note">備註：'+esc(t.note)+'</div>':''}
+    <div class="rc-foot">單號 ${esc(t.id.toUpperCase())}<br>感謝您的惠顧 · sky 健康生活</div>
+  </div>`;
+}
+function exportReceipt(){
+  const el=$('receiptEl');if(!el){toast('無收據內容');return;}
+  toast('產生圖片中…');
+  html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(canvas=>{
+    const t=curTxn;const d=new Date(t.date);
+    const fn='消費明細_'+t.memberName+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'+t.id.slice(-4)+'.jpg';
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download=fn;a.style.display='none';
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},300);
+      toast('已匯出 JPG');
+    },'image/jpeg',0.95);
+  }).catch(e=>{toast('匯出失敗，請重試');console.error(e);});
+}
+function deleteCurrentTxn(){
+  if(!curTxn)return;
+  S.txns=S.txns.filter(t=>t.id!==curTxn.id);
+  curTxn=null;
+  save();
+  closeMask('recMask');
+  hideDelConfirm();
+  renderRecords();
+  toast('已刪除記錄');
+}
+
+/* ============ settings ============ */
+function openSettings(){$('setStore').value=S.settings.store;$('setTag').value=S.settings.tag;
+  $('logoPreview').innerHTML=S.settings.logo?`<img src="${S.settings.logo}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`:'<span style="color:var(--muted);font-size:12px">尚未設定 Logo</span>';
+  openMask('setMask');}
+let pendingLogo=null;
+function onLogoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{pendingLogo=r.result;$('logoPreview').innerHTML=`<img src="${r.result}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`;};r.readAsDataURL(f);}
+function clearLogo(){pendingLogo='';$('logoPreview').innerHTML='<span style="color:var(--muted);font-size:12px">已移除</span>';}
+function saveSettings(){
+  S.settings.store=$('setStore').value.trim()||'美安台灣 POS';
+  S.settings.tag=$('setTag').value.trim();
+  if(pendingLogo!==null)S.settings.logo=pendingLogo;
+  pendingLogo=null;save();applySettings();closeMask('setMask');toast('已儲存設定');
+}
+function applySettings(){
+  $('storeTitle').textContent=S.settings.store;
+  $('railLogo').innerHTML=S.settings.logo?`<img src="${S.settings.logo}">`:'sky';
+}
+
+/* ============ backup ============ */
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='美安POS備份_'+new Date().toISOString().slice(0,10)+'.json';
+  a.style.display='none';document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},300);
+  toast('已匯出備份');
+}
+function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.products||!d.cats)throw 0;
+    showConfirm('匯入備份？','將覆蓋目前所有資料，此操作無法復原','確定匯入',()=>{
+      S=d;S.settings=Object.assign({store:'美安台灣 POS',tag:'sky',logo:''},S.settings||{});save();
+      applySettings();renderChips();renderGrid();go('records');toast('已匯入備份');
+    });
+  }catch(err){toast('檔案格式錯誤');}};r.readAsText(f);e.target.value='';}
+
+/* ============ modal helpers ============ */
+function openMask(id){$(id).classList.add('show');}
+function closeMask(id){$(id).classList.remove('show');}
+document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+
+/* ============ clock ============ */
+function tick(){const d=new Date();const wk=['日','一','二','三','四','五','六'][d.getDay()];
+  $('cDate').textContent=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} (${wk})`;
+  $('cTime').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;}
+setInterval(tick,1000);tick();
+
+/* ============ init ============ */
+applySettings();fillMemberSelects();renderChips();renderGrid();renderCart();
+</script>
+</body>
+</html>
