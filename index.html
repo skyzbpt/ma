@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
 :root{
   --bg:#f4efe4; --paper:#ffffff; --ink:#1c211e; --muted:#6b7269;
@@ -1048,6 +1047,7 @@ function buildReceiptHTML(t){
 }
 function exportReceipt(){
   const el=$('receiptEl');if(!el){toast('無收據內容');return;}
+  if(typeof html2canvas!=='function'){toast('匯出元件尚未載入，請檢查網路後重試');return;}
   toast('產生圖片中…');
   html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(canvas=>{
     const t=curTxn;const d=new Date(t.date);
