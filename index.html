@@ -91,7 +91,7 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .card:hover .edit{display:grid}
 .card .edit svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
 .card .edit:hover{background:var(--accent-soft)}
-.card .added-flash{position:absolute;inset:0;border-radius:17px;background:rgba(15,61,62,.08);opacity:0;pointer-events:none;transition:.3s}
+
 .empty{color:var(--muted);text-align:center;padding:60px;font-size:15px;grid-column:1/-1}
 
 /* FAB – floating cart button */
@@ -321,7 +321,7 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
       <div class="drawer" id="cartDrawer">
         <div class="drawer-head">
           <h3>購物車</h3>
-          <button class="dclose" onclick="closeDrawer()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+          <button onclick="closeDrawer()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
         <div class="member-sel">
           <select id="cartMember"><option value="">— 散客 —</option></select>
@@ -626,7 +626,7 @@ function addToCart(code){
   const wasEmpty=!cart.items.length;
   const ex=cart.items.find(i=>i.code===code);
   if(ex){ex.qty++;}
-  else cart.items.push({code:p.code,name:p.name,bv:p.bv,price:p.retail,qty:1,manual:false});
+  else cart.items.push({code:p.code,name:p.name,bv:p.bv,price:p.retail,qty:1});
   renderCart();
   if(wasEmpty)openDrawer();
 }
@@ -700,11 +700,10 @@ function renderCart(){
   $('tCount').textContent=count;$('tBV').textContent=bv.toLocaleString();$('tGrand').textContent=money(grand);
   $('checkoutBtn').disabled=!cart.items.length;
 }
-function setPrice(i,v){cart.items[i].price=Math.max(0,Number(v)||0);cart.items[i].manual=true;renderCart();}
+function setPrice(i,v){cart.items[i].price=Math.max(0,Number(v)||0);renderCart();}
 function chQty(i,d){cart.items[i].qty+=d;if(cart.items[i].qty<=0)cart.items.splice(i,1);renderCart();}
 function rmLine(i){cart.items.splice(i,1);renderCart();}
 /* ============ confirm helper (replaces window.confirm/prompt for Safari) ============ */
-let _confirmCb=null;
 function showConfirm(msg,sub,okLabel,cb){
   $('confirmMsg').textContent=msg;
   $('confirmSub').textContent=sub||'';
@@ -879,7 +878,6 @@ function renderProdCatList(){
   const cf=$('catFilter').value;
   const q=($('catProdSearch').value||'').trim().toLowerCase();
   const list=S.products.filter(p=>(cf==='all'||p.cat===cf)&&(!q||p.name.toLowerCase().includes(q)||p.code.toLowerCase().includes(q)));
-  const catOpts=S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   if(!list.length){$('prodCatBody').innerHTML=`<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px">無符合產品</td></tr>`;return;}
   $('prodCatBody').innerHTML=list.map(p=>`
     <tr>
