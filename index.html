@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>sky · 美安台灣 POS</title>
-<link rel="icon" id="faviconLink">
+<link rel="icon" id="faviconLink" href="logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -552,12 +552,12 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
         <input type="file" id="setLogo" accept="image/*" onchange="onLogoPick(event)">
         <div id="logoPreview" style="margin-top:8px"></div>
       </div>
-      <button class="mini red" onclick="clearLogo()">移除 Logo</button>
+      <button class="mini red" onclick="clearLogo()">還原預設 Logo</button>
       <div class="field" style="margin-top:16px"><label>Favicon（瀏覽器分頁小圖示）</label>
         <input type="file" id="setFavicon" accept="image/*" onchange="onFaviconPick(event)">
         <div id="favPreview" style="margin-top:8px"></div>
       </div>
-      <button class="mini red" onclick="clearFavicon()">移除 Favicon</button>
+      <button class="mini red" onclick="clearFavicon()">還原預設 Favicon</button>
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeMask('setMask')">取消</button>
@@ -1034,7 +1034,7 @@ function hideDelConfirm(){$('recFootNormal').style.display='flex';$('recFootConf
 function buildReceiptHTML(t){
   const d=new Date(t.date);
   const ds=d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  const logo=S.settings.logo?`<img src="${S.settings.logo}">`:'sky';
+  const logo=`<img src="${S.settings.logo||'logo.jpeg'}">`;
   const rows=t.items.map(i=>`<tr><td>${esc(i.name)}<div style="color:#b48a3d;font-size:10px" class="mono">${esc(i.code)}</div></td>
     <td class="mono" style="text-align:center">${i.qty}</td>
     <td class="mono" style="text-align:right">${money(i.price)}</td>
@@ -1087,13 +1087,13 @@ function deleteCurrentTxn(){
 /* ============ settings ============ */
 function openSettings(){$('setStore').value=S.settings.store;$('setTag').value=S.settings.tag;
   pendingLogo=null;pendingFavicon=null;$('setLogo').value='';$('setFavicon').value='';
-  $('logoPreview').innerHTML=S.settings.logo?`<img src="${S.settings.logo}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`:'<span style="color:var(--muted);font-size:12px">尚未設定 Logo</span>';
-  $('favPreview').innerHTML=S.settings.favicon?`<img src="${S.settings.favicon}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`:'<span style="color:var(--muted);font-size:12px">尚未設定 Favicon</span>';
+  $('logoPreview').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`+(S.settings.logo?'':'<span style="color:var(--muted);font-size:12px;margin-left:8px">預設圖片</span>');
+  $('favPreview').innerHTML=`<img src="${S.settings.favicon||S.settings.logo||'logo.jpeg'}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`+(S.settings.favicon?'':'<span style="color:var(--muted);font-size:12px;margin-left:8px">預設圖片</span>');
   openMask('setMask');}
 let pendingLogo=null;
 function onLogoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{pendingLogo=r.result;$('logoPreview').innerHTML=`<img src="${r.result}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`;};r.readAsDataURL(f);}
-function clearLogo(){pendingLogo='';$('logoPreview').innerHTML='<span style="color:var(--muted);font-size:12px">已移除</span>';}
+function clearLogo(){pendingLogo='';$('logoPreview').innerHTML='<img src="logo.jpeg" style="height:54px;border-radius:10px;border:1px solid var(--line)"><span style="color:var(--muted);font-size:12px;margin-left:8px">已還原預設圖片</span>';}
 let pendingFavicon=null;
 function onFaviconPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{const img=new Image();
@@ -1105,7 +1105,7 @@ function onFaviconPick(e){const f=e.target.files[0];if(!f)return;const r=new Fil
     };
     img.onerror=()=>toast('圖片無法讀取');
     img.src=r.result;};r.readAsDataURL(f);}
-function clearFavicon(){pendingFavicon='';$('favPreview').innerHTML='<span style="color:var(--muted);font-size:12px">已移除</span>';}
+function clearFavicon(){pendingFavicon='';$('favPreview').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)"><span style="color:var(--muted);font-size:12px;margin-left:8px">已還原預設圖片</span>`;}
 function saveSettings(){
   S.settings.store=$('setStore').value.trim()||'美安台灣 POS';
   S.settings.tag=$('setTag').value.trim();
@@ -1115,10 +1115,8 @@ function saveSettings(){
 }
 function applySettings(){
   $('storeTitle').textContent=S.settings.store;
-  $('railLogo').innerHTML=S.settings.logo?`<img src="${S.settings.logo}">`:'sky';
-  const fav=$('faviconLink');
-  const icon=S.settings.favicon||S.settings.logo;
-  if(icon)fav.href=icon;else fav.removeAttribute('href');
+  $('railLogo').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}">`;
+  $('faviconLink').href=S.settings.favicon||S.settings.logo||'logo.jpeg';
 }
 
 /* ============ backup ============ */
