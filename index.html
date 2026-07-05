@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>sky · 美安台灣 POS</title>
+<link rel="icon" id="faviconLink">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -552,6 +553,11 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
         <div id="logoPreview" style="margin-top:8px"></div>
       </div>
       <button class="mini red" onclick="clearLogo()">移除 Logo</button>
+      <div class="field" style="margin-top:16px"><label>Favicon（瀏覽器分頁小圖示）</label>
+        <input type="file" id="setFavicon" accept="image/*" onchange="onFaviconPick(event)">
+        <div id="favPreview" style="margin-top:8px"></div>
+      </div>
+      <button class="mini red" onclick="clearFavicon()">移除 Favicon</button>
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeMask('setMask')">取消</button>
@@ -576,9 +582,9 @@ const SEED = {"products": [{"code": "T13145", "name": "Curcuma™薑黃膠囊食
 
 /* ============ state ============ */
 let S = dbGet(KEY, null);
-if(!S){ S = {products:SEED.products, cats:SEED.cats, members:[], txns:[], settings:{store:'美安台灣 POS',tag:'sky',logo:''}}; }
+if(!S){ S = {products:SEED.products, cats:SEED.cats, members:[], txns:[], settings:{store:'美安台灣 POS',tag:'sky',logo:'',favicon:''}}; }
 // safety defaults
-S.settings = Object.assign({store:'美安台灣 POS',tag:'sky',logo:''}, S.settings||{});
+S.settings = Object.assign({store:'美安台灣 POS',tag:'sky',logo:'',favicon:''}, S.settings||{});
 function save(){ dbSet(KEY,S); }
 
 let cart={items:[],discount:{type:'pct',value:0}};
@@ -1080,21 +1086,39 @@ function deleteCurrentTxn(){
 
 /* ============ settings ============ */
 function openSettings(){$('setStore').value=S.settings.store;$('setTag').value=S.settings.tag;
+  pendingLogo=null;pendingFavicon=null;$('setLogo').value='';$('setFavicon').value='';
   $('logoPreview').innerHTML=S.settings.logo?`<img src="${S.settings.logo}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`:'<span style="color:var(--muted);font-size:12px">尚未設定 Logo</span>';
+  $('favPreview').innerHTML=S.settings.favicon?`<img src="${S.settings.favicon}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`:'<span style="color:var(--muted);font-size:12px">尚未設定 Favicon</span>';
   openMask('setMask');}
 let pendingLogo=null;
 function onLogoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{pendingLogo=r.result;$('logoPreview').innerHTML=`<img src="${r.result}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`;};r.readAsDataURL(f);}
 function clearLogo(){pendingLogo='';$('logoPreview').innerHTML='<span style="color:var(--muted);font-size:12px">已移除</span>';}
+let pendingFavicon=null;
+function onFaviconPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');c.width=64;c.height=64;
+      c.getContext('2d').drawImage(img,0,0,64,64);
+      pendingFavicon=c.toDataURL('image/png');
+      $('favPreview').innerHTML=`<img src="${pendingFavicon}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`;
+    };
+    img.onerror=()=>toast('圖片無法讀取');
+    img.src=r.result;};r.readAsDataURL(f);}
+function clearFavicon(){pendingFavicon='';$('favPreview').innerHTML='<span style="color:var(--muted);font-size:12px">已移除</span>';}
 function saveSettings(){
   S.settings.store=$('setStore').value.trim()||'美安台灣 POS';
   S.settings.tag=$('setTag').value.trim();
   if(pendingLogo!==null)S.settings.logo=pendingLogo;
-  pendingLogo=null;save();applySettings();closeMask('setMask');toast('已儲存設定');
+  if(pendingFavicon!==null)S.settings.favicon=pendingFavicon;
+  pendingLogo=null;pendingFavicon=null;save();applySettings();closeMask('setMask');toast('已儲存設定');
 }
 function applySettings(){
   $('storeTitle').textContent=S.settings.store;
   $('railLogo').innerHTML=S.settings.logo?`<img src="${S.settings.logo}">`:'sky';
+  const fav=$('faviconLink');
+  const icon=S.settings.favicon||S.settings.logo;
+  if(icon)fav.href=icon;else fav.removeAttribute('href');
 }
 
 /* ============ backup ============ */
@@ -1110,7 +1134,7 @@ function exportBackup(){
 function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.products||!d.cats)throw 0;
     showConfirm('匯入備份？','將覆蓋目前所有資料，此操作無法復原','確定匯入',()=>{
-      S=d;S.settings=Object.assign({store:'美安台灣 POS',tag:'sky',logo:''},S.settings||{});save();
+      S=d;S.settings=Object.assign({store:'美安台灣 POS',tag:'sky',logo:'',favicon:''},S.settings||{});save();
       applySettings();renderChips();renderGrid();go('records');toast('已匯入備份');
     });
   }catch(err){toast('檔案格式錯誤');}};r.readAsText(f);e.target.value='';}
