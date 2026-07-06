@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#f4efe4; --paper:#ffffff; --ink:#1c211e; --muted:#6b7269;
@@ -57,6 +60,10 @@ input,select,textarea{font-family:inherit;font-size:15px}
 .topbar .sub{color:var(--muted);font-size:12.5px;font-weight:500;margin-top:1px}
 .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .clock{font-size:13px;color:var(--muted);text-align:right}
+.sync-badge{font-size:11px;font-weight:700;padding:5px 10px;border-radius:99px;background:rgba(107,114,105,.1);color:var(--muted);white-space:nowrap}
+.sync-badge.on{background:rgba(15,61,62,.1);color:var(--primary)}
+.sync-badge.syncing{background:rgba(217,119,66,.12);color:var(--accent)}
+.sync-badge.off{background:rgba(192,73,47,.1);color:var(--danger)}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid var(--line)}
 .icon-btn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8}
 .icon-btn:hover{border-color:var(--accent)}
@@ -286,6 +293,7 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
         <div class="sub">sky 銷售管理系統</div>
       </div>
       <div class="top-right">
+        <div class="sync-badge" id="syncStatus" title="雲端同步狀態">☁ 未連線</div>
         <div class="clock"><div id="cDate"></div><div id="cTime" class="mono" style="font-weight:700;color:var(--ink);font-size:15px"></div></div>
       </div>
     </header>
@@ -585,10 +593,74 @@ let S = dbGet(KEY, null);
 if(!S){ S = {products:SEED.products, cats:SEED.cats, members:[], txns:[], settings:{store:'美安台灣 POS',tag:'sky',logo:'',favicon:''}}; }
 // safety defaults
 S.settings = Object.assign({store:'美安台灣 POS',tag:'sky',logo:'',favicon:''}, S.settings||{});
-function save(){ dbSet(KEY,S); }
+function save(){ dbSet(KEY,S); pushCloud(); }
 
 let cart={items:[],discount:{type:'pct',value:0}};
 let curTxn=null, editProdCode=null;
+
+/* ============ cloud sync (firebase) ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCqiJrJlZi7VTRmylG1FESMzC2-4Nww9fg",
+  authDomain: "ma-taiwan-pos.firebaseapp.com",
+  projectId: "ma-taiwan-pos",
+  storageBucket: "ma-taiwan-pos.firebasestorage.app",
+  messagingSenderId: "77869935068",
+  appId: "1:77869935068:web:e49ebf9ec3d8e370528719"
+};
+const CLOUD_COL='posData', CLOUD_DOC='store1';
+let cloudDb=null, cloudReady=false, applyingRemote=false, cloudPushTimer=null;
+
+function setSyncBadge(text,cls){const el=$('syncStatus');if(!el)return;el.textContent=text;el.className='sync-badge '+(cls||'');}
+
+function applyRemoteState(data){
+  applyingRemote=true;
+  S=data;
+  S.settings=Object.assign({store:'美安台灣 POS',tag:'sky',logo:'',favicon:''},S.settings||{});
+  dbSet(KEY,S);
+  applySettings();fillMemberSelects();renderChips();renderGrid();renderCart();
+  const activeView=document.querySelector('.view.active');
+  if(activeView){
+    if(activeView.id==='view-members')renderMembers();
+    if(activeView.id==='view-cats')renderCats();
+    if(activeView.id==='view-records')renderRecords();
+  }
+  applyingRemote=false;
+}
+
+function pushCloud(){
+  if(!cloudReady||applyingRemote||!cloudDb)return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer=setTimeout(()=>{
+    setSyncBadge('☁ 同步中…','syncing');
+    cloudDb.collection(CLOUD_COL).doc(CLOUD_DOC).set(JSON.parse(JSON.stringify(S)))
+      .then(()=>setSyncBadge('☁ 已同步','on'))
+      .catch(()=>setSyncBadge('⚠ 同步失敗（僅本機）','off'));
+  },350);
+}
+
+function initCloud(){
+  if(typeof firebase==='undefined'){setSyncBadge('☁ 未連線（僅本機）','off');return;}
+  try{
+    firebase.initializeApp(firebaseConfig);
+    cloudDb=firebase.firestore();
+    setSyncBadge('☁ 連線中…','syncing');
+    firebase.auth().signInAnonymously().catch(()=>setSyncBadge('☁ 連線失敗（僅本機）','off'));
+    firebase.auth().onAuthStateChanged(user=>{
+      if(!user)return;
+      const ref=cloudDb.collection(CLOUD_COL).doc(CLOUD_DOC);
+      ref.onSnapshot(snap=>{
+        if(snap.exists){
+          applyRemoteState(snap.data());
+          cloudReady=true;
+          setSyncBadge('☁ 已同步','on');
+        } else {
+          cloudReady=true;
+          ref.set(JSON.parse(JSON.stringify(S))).then(()=>setSyncBadge('☁ 已同步','on'));
+        }
+      },()=>setSyncBadge('☁ 連線中斷（使用本機）','off'));
+    });
+  }catch(e){setSyncBadge('☁ 初始化失敗（僅本機）','off');}
+}
 
 /* ============ helpers ============ */
 const $=id=>document.getElementById(id);
@@ -1157,6 +1229,7 @@ setInterval(tick,1000);tick();
 
 /* ============ init ============ */
 applySettings();fillMemberSelects();renderChips();renderGrid();renderCart();
+initCloud();
 </script>
 </body>
 </html>
