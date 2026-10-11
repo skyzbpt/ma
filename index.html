@@ -2,7 +2,8 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <title>sky · 美安台灣 POS</title>
 <link rel="icon" id="faviconLink" href="logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,256 +14,442 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
+/* ============ theme：天空藍 · 簡約 ============ */
 :root{
-  --bg:#f4efe4; --paper:#ffffff; --ink:#1c211e; --muted:#6b7269;
-  --line:#e3dccd; --primary:#0f3d3e; --primary-2:#155457; --accent:#d97742;
-  --accent-soft:#f6e3d4; --good:#2f8f5b; --danger:#c0492f; --gold:#b48a3d;
-  --shadow:0 1px 2px rgba(28,33,30,.05),0 8px 24px -12px rgba(28,33,30,.18);
-  --radius:16px; --rail:84px;
+  --bg:#f3f8fc; --paper:#ffffff; --ink:#0f2233; --muted:#5f7385; --faint:#8597a8;
+  --line:#e1eaf2; --line-2:#cddbe7; --soft:#eef3f7;
+  --sky-50:#f0f8ff; --sky-100:#e0f2fe; --sky-200:#bae6fd; --sky-400:#38bdf8;
+  --primary:#0a7bbf; --primary-2:#08679f; --primary-ink:#075985;
+  --good:#15803d; --good-soft:#e9f7ef; --danger:#d14343; --danger-soft:#fdeeee;
+  --shadow-sm:0 1px 2px rgba(15,34,51,.05);
+  --shadow:0 1px 2px rgba(15,34,51,.04),0 8px 24px -12px rgba(15,34,51,.16);
+  --shadow-lg:0 30px 70px -20px rgba(15,34,51,.38);
+  --ring:0 0 0 4px rgba(56,189,248,.2);
+  --radius:16px; --rail:84px; --nav-h:64px;
+  --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 html,body{margin:0;height:100%}
 body{
-  font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
-  background:
-    radial-gradient(1200px 600px at 100% -10%,rgba(15,61,62,.06),transparent 60%),
-    radial-gradient(900px 500px at -10% 110%,rgba(217,119,66,.07),transparent 60%),
-    var(--bg);
-  -webkit-font-smoothing:antialiased;overflow:hidden;
+  font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);
+  background:var(--bg);-webkit-font-smoothing:antialiased;overflow:hidden;
 }
-.mono{font-family:"Noto Sans TC",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0}
+.mono{font-variant-numeric:tabular-nums;letter-spacing:0}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-input,select,textarea{font-family:inherit;font-size:15px}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
+:focus-visible{outline:2px solid var(--sky-400);outline-offset:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
+::selection{background:var(--sky-200)}
 ::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-thumb{background:#cdc6b5;border-radius:20px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb{background:#c9d6e2;border-radius:20px;border:3px solid transparent;background-clip:content-box}
+
+/* form controls */
+.input,.field input,.field select,.field textarea{
+  height:44px;padding:0 13px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);
+  outline:none;font-size:15px;transition:border-color .15s,box-shadow .15s}
+.field input,.field select,.field textarea{width:100%}
+.field textarea{height:auto;padding:11px 13px;resize:vertical;line-height:1.5}
+.input:focus,.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--sky-400);box-shadow:var(--ring)}
+select.input,.field select{appearance:none;-webkit-appearance:none;padding-right:36px;cursor:pointer;
+  background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f7385' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center/14px}
+.input.sm{height:38px;font-size:13.5px;border-radius:11px;padding:0 11px}
+select.input.sm{padding-right:30px;background-position:right 10px center}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:46px;padding:0 18px;border-radius:12px;
+  font-weight:700;font-size:15px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.btn svg,.mini svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn.primary{background:var(--primary);color:#fff;flex:2}
+.btn.primary:hover{background:var(--primary-2)}
+.btn.primary:disabled{background:var(--line-2);cursor:not-allowed}
+.btn.ghost{background:var(--paper);border:1.5px solid var(--line);color:var(--muted);flex:1}
+.btn.ghost:hover{border-color:var(--line-2);color:var(--ink)}
+.btn.danger{background:var(--danger);color:#fff;flex:1}
+.btn.danger:hover{background:#b93636}
+.btn.danger-ghost{background:var(--paper);border:1.5px solid #f2cccc;color:var(--danger);flex:1}
+.btn.danger-ghost:hover{background:var(--danger-soft)}
+.mini{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 13px;border-radius:10px;font-size:13px;font-weight:700;
+  color:var(--primary);background:var(--sky-100);white-space:nowrap;cursor:pointer;transition:background .15s,color .15s}
+.mini:hover{background:var(--sky-200)}
+.mini.gray{background:var(--soft);color:var(--muted)}
+.mini.gray:hover{background:#e3eaf0;color:var(--ink)}
+.mini.red{background:var(--danger-soft);color:var(--danger)}
+.mini.red:hover{background:#fadcdc}
+.icon-btn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line);flex-shrink:0;transition:border-color .15s,background .15s}
+.icon-btn svg{width:20px;height:20px;stroke:var(--primary);fill:none;stroke-width:2.2;stroke-linecap:round}
+.icon-btn:hover{border-color:var(--sky-400);background:var(--sky-50)}
+.close-btn{margin-left:auto;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted);flex-shrink:0;transition:background .15s,color .15s}
+.close-btn:hover{background:var(--soft);color:var(--ink)}
+.close-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
 
 /* layout */
 .app{display:grid;grid-template-columns:var(--rail) 1fr;height:100vh;height:100dvh}
-.rail{
-  background:var(--primary);color:#e9efe9;display:flex;flex-direction:column;align-items:center;
-  padding:14px 8px;gap:6px;
-}
-.brand{width:52px;height:52px;border-radius:14px;background:linear-gradient(160deg,var(--accent),#c25f2e);
-  display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px;line-height:1.05;text-align:center;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);margin-bottom:10px;overflow:hidden}
+.rail{background:var(--paper);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:14px 8px;gap:4px;z-index:20}
+.brand{width:52px;height:52px;border-radius:14px;background:#000;display:grid;place-items:center;font-weight:900;color:#fff;font-size:13px;
+  overflow:hidden;margin-bottom:12px;box-shadow:0 0 0 1px var(--line)}
 .brand img{width:100%;height:100%;object-fit:cover}
 .nav-btn{width:68px;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  color:#bcccc4;font-size:11px;font-weight:700;transition:.15s;background:transparent}
-.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
-.nav-btn:hover{color:#fff;background:rgba(255,255,255,.06)}
-.nav-btn.active{color:var(--primary);background:#e9efe9}
+  color:var(--muted);font-size:12px;font-weight:700;transition:background .15s,color .15s}
+.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn:hover{color:var(--primary);background:var(--sky-50)}
+.nav-btn.active{color:var(--primary);background:var(--sky-100)}
 .rail-spacer{flex:1}
 
 .main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--line);
-  background:rgba(255,255,255,.6);backdrop-filter:blur(8px)}
-.topbar h1{margin:0;font-size:19px;font-weight:900;letter-spacing:.3px}
-.topbar .sub{color:var(--muted);font-size:12.5px;font-weight:500;margin-top:1px}
-.top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.clock{font-size:13px;color:var(--muted);text-align:right}
-.sync-badge{font-size:11px;font-weight:700;padding:5px 10px;border-radius:99px;background:rgba(107,114,105,.1);color:var(--muted);white-space:nowrap}
-.sync-badge.on{background:rgba(15,61,62,.1);color:var(--primary)}
-.sync-badge.syncing{background:rgba(217,119,66,.12);color:var(--accent)}
-.sync-badge.off{background:rgba(192,73,47,.1);color:var(--danger)}
-.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid var(--line)}
-.icon-btn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8}
-.icon-btn:hover{border-color:var(--accent)}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 24px;border-bottom:1px solid var(--line);flex-shrink:0;
+  background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.topbar .ttl{min-width:0}
+.topbar h1{margin:0;font-size:18px;font-weight:900;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .sub{color:var(--muted);font-size:12px;font-weight:500;margin-top:2px}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.clock{text-align:right;line-height:1.3}
+.clock .d{font-size:12px;color:var(--muted)}
+.clock .t{font-size:15px;font-weight:700}
+.sync-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;padding:6px 12px 6px 10px;border-radius:99px;
+  background:var(--soft);color:var(--muted);white-space:nowrap;cursor:default}
+.sync-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sync-badge.on{background:var(--good-soft);color:var(--good)}
+.sync-badge.syncing{background:var(--sky-100);color:var(--primary)}
+.sync-badge.syncing::before{animation:blink 1s ease-in-out infinite}
+.sync-badge.off{background:var(--danger-soft);color:var(--danger)}
+@keyframes blink{50%{opacity:.25}}
 
-.view{flex:1;overflow:hidden;display:none}
+.view{flex:1;overflow:hidden;display:none;min-height:0}
 .view.active{display:flex}
 
-/* POS – full width catalog */
+/* POS – catalog */
 .pos{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;position:relative}
-.catalog{display:flex;flex-direction:column;overflow:hidden;padding:18px 22px 0;min-height:0;flex:1}
-.tools{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;-webkit-align-items:center;align-items:center;margin-bottom:14px;margin-right:-10px}
-.tools>*{margin-right:10px;margin-bottom:4px}
-.search{flex:1;max-width:520px;position:relative}
-.search input{width:100%;padding:13px 36px 13px 44px;border-radius:14px;border:1.5px solid var(--line);background:#fff;outline:none;font-size:15px}
-.search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,61,62,.08)}
-.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:19px;height:19px;stroke:var(--muted);fill:none;stroke-width:2}
-.search .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;line-height:0;color:var(--muted);display:none;font-size:13px}
-.search .clear-btn:hover{color:var(--ink)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:14px;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.catalog{display:flex;flex-direction:column;overflow:hidden;padding:18px 24px 0;min-height:0;flex:1}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.search{flex:1;max-width:560px;min-width:200px;position:relative}
+.search input{width:100%;height:46px;padding:0 40px 0 44px;border-radius:14px;border:1.5px solid var(--line);background:var(--paper);
+  outline:none;font-size:15px;transition:border-color .15s,box-shadow .15s}
+.search input:focus{border-color:var(--sky-400);box-shadow:var(--ring)}
+.search input::placeholder{color:var(--faint)}
+.search>svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;pointer-events:none}
+.search .clear-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
+.search .clear-btn:hover{background:var(--soft);color:var(--ink)}
+.search .clear-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
+.search .kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--faint);
+  border:1.5px solid var(--line);border-radius:7px;padding:0 7px;line-height:20px;pointer-events:none}
+.search.sm{flex:1;min-width:150px}
+.search.sm input{height:38px;font-size:13.5px;border-radius:11px;padding-left:36px;padding-right:12px}
+.search.sm>svg{left:12px;width:16px;height:16px}
+.btn-add{height:46px;padding:0 16px;border-radius:14px;font-size:14px}
+.result-count{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 14px;margin:0 -2px;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{padding:9px 18px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;
-  white-space:nowrap;color:var(--muted);transition:.15s;flex-shrink:0}
-.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);
+  font-size:13.5px;font-weight:700;white-space:nowrap;color:var(--muted);flex-shrink:0;transition:background .15s,border-color .15s,color .15s}
+.chip .n{font-size:11.5px;font-weight:600;opacity:.7}
+.chip:hover{border-color:var(--sky-200);color:var(--primary)}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-content:start;padding:0 0 100px}
-/* big tap-friendly cards */
-.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;
-  gap:10px;text-align:left;transition:.15s;position:relative;box-shadow:var(--shadow);cursor:pointer;user-select:none}
-.card:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:0 8px 32px -8px rgba(15,61,62,.22)}
-.card:active{transform:scale(.97);transition:.05s}
-.card .nm{font-size:15px;font-weight:700;line-height:1.4;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card .price{font-size:22px;font-weight:900;color:var(--primary);letter-spacing:-.5px}
-.card .bv-pill{display:inline-block;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;align-self:flex-start}
-.card .cat-tag{align-self:flex-start;padding:2px 8px;border-radius:99px;background:rgba(15,61,62,.08);color:var(--primary);font-size:10px;font-weight:700;opacity:.8}
-.card .edit{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:9px;background:rgba(244,239,228,.9);display:none;place-items:center;backdrop-filter:blur(4px)}
-.card:hover .edit{display:grid}
-.card .edit svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
-.card .edit:hover{background:var(--accent-soft)}
+.chip.active .n{opacity:.85}
 
-.empty{color:var(--muted);text-align:center;padding:60px;font-size:15px;grid-column:1/-1}
+/* product cards */
+.grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;align-content:start;padding:2px 2px 120px;margin:0 -2px}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;
+  text-align:left;position:relative;box-shadow:var(--shadow-sm);cursor:pointer;user-select:none;-webkit-user-select:none;
+  transition:border-color .15s,box-shadow .15s,transform .15s}
+.card:hover{border-color:var(--sky-200);box-shadow:var(--shadow);transform:translateY(-2px)}
+.card:active{transform:scale(.98);transition-duration:.05s}
+.card.in-cart{border-color:var(--sky-400);box-shadow:0 0 0 3px rgba(56,189,248,.14)}
+.card.bump{animation:cardBump .3s ease}
+@keyframes cardBump{40%{transform:scale(.96)}100%{transform:scale(1)}}
+.card .top{display:flex;align-items:center;gap:6px;min-height:24px}
+.card .cat-tag{min-width:0;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--muted);font-size:11px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .qty-badge{margin-left:auto;flex-shrink:0;height:24px;min-width:24px;padding:0 8px;border-radius:99px;background:var(--primary);color:#fff;
+  font-size:12px;font-weight:900;display:inline-flex;align-items:center;justify-content:center}
+.card .nm{font-size:15px;font-weight:700;line-height:1.45;min-height:2.9em;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .price{font-size:22px;font-weight:900;color:var(--primary-ink);letter-spacing:-.3px;line-height:1.2}
+.card .meta{display:flex;align-items:center;gap:8px;min-height:30px}
+.card .bv-pill{padding:3px 9px;border-radius:99px;background:var(--sky-100);color:var(--primary-ink);font-size:11.5px;font-weight:700;white-space:nowrap}
+.card .code{font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.card .edit{margin-left:auto;flex-shrink:0;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--muted);opacity:0;transition:opacity .15s,background .15s,color .15s}
+.card:hover .edit,.card:focus-visible .edit{opacity:1}
+.card .edit:hover{background:var(--sky-100);color:var(--primary)}
+.card .edit svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(hover:none){
+  .search .kbd{display:none}
+  .card .edit{opacity:1;background:var(--soft)}
+  .card:hover{transform:none;box-shadow:var(--shadow-sm);border-color:var(--line)}
+  .card.in-cart:hover{border-color:var(--sky-400);box-shadow:0 0 0 3px rgba(56,189,248,.14)}
+}
+.empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 20px;color:var(--muted);text-align:center;font-size:15px}
+.empty svg{width:44px;height:44px;stroke:var(--sky-200);fill:none;stroke-width:1.8;stroke-linecap:round}
 
 /* FAB – floating cart button */
-.fab{position:fixed;bottom:28px;right:28px;z-index:30;display:flex;align-items:center;gap:12px;
-  background:var(--primary);color:#fff;border-radius:999px;padding:0 22px 0 18px;height:60px;
-  box-shadow:0 8px 28px -6px rgba(15,61,62,.55);transition:.2s;border:none;font-family:inherit;cursor:pointer}
+.fab{position:fixed;bottom:28px;right:28px;z-index:30;display:flex;align-items:center;gap:18px;background:var(--primary);color:#fff;
+  border:1.5px solid transparent;border-radius:999px;padding:0 24px 0 18px;height:62px;
+  box-shadow:0 14px 30px -12px rgba(10,123,191,.7);transition:background .2s,box-shadow .2s,transform .2s}
 .fab:hover{background:var(--primary-2);transform:translateY(-2px)}
 .fab:active{transform:scale(.97)}
+.fab.bump{animation:fabBump .4s ease}
+@keyframes fabBump{30%{transform:scale(1.08)}60%{transform:scale(.97)}100%{transform:scale(1)}}
 .fab-icon{width:26px;height:26px;position:relative}
-.fab-icon svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2}
-.fab-badge{position:absolute;top:-8px;right:-10px;min-width:20px;height:20px;border-radius:99px;background:var(--accent);
-  color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 5px;border:2px solid var(--primary)}
+.fab-icon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fab-badge{position:absolute;top:-9px;right:-11px;min-width:21px;height:21px;border-radius:99px;background:#fff;color:var(--primary);
+  font-size:11.5px;font-weight:900;display:grid;place-items:center;padding:0 5px;box-shadow:0 0 0 2px var(--primary)}
 .fab-info{display:flex;flex-direction:column;align-items:flex-start}
-.fab-label{font-size:12px;font-weight:700;opacity:.75;line-height:1}
-.fab-total{font-size:17px;font-weight:900;line-height:1.2}
-.fab.empty-cart{background:#888;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.fab-label{font-size:12px;font-weight:700;opacity:.85;line-height:1}
+.fab-total{font-size:18px;font-weight:900;line-height:1.25}
+.fab.empty-cart{background:var(--paper);color:var(--muted);border-color:var(--line);box-shadow:var(--shadow)}
+.fab.empty-cart:hover{border-color:var(--line-2)}
 
-/* Cart drawer */
-.drawer-overlay{position:fixed;inset:0;background:rgba(28,33,30,.45);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:.25s}
+/* cart drawer */
+.drawer-overlay{position:fixed;inset:0;background:rgba(15,34,51,.38);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
 .drawer-overlay.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;width:480px;max-width:100vw;height:100%;z-index:41;
-  background:#fff;display:flex;flex-direction:column;
-  box-shadow:-8px 0 40px rgba(28,33,30,.18);
-  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.drawer.open{transform:translateX(0)}
-.drawer-head{display:flex;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--line);gap:14px;flex-shrink:0}
-.drawer-head h3{margin:0;font-size:22px;font-weight:900;flex:1}
-.member-sel{display:flex;gap:8px;align-items:center;padding:16px 20px 0;flex-shrink:0}
-.member-sel select{flex:1;padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#faf8f2;outline:none;font-size:14px}
-.cart-items{flex:1;overflow-y:auto;padding:4px 20px}
-.line{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--line)}
-.line .li-nm{flex:1;min-width:0}
-.line .li-nm .t{font-size:12px;font-weight:600;line-height:1.35}
-.line .li-nm .c{font-size:10px;color:var(--accent);font-weight:700;margin-bottom:2px}
-.line .li-price{display:flex;align-items:center;gap:3px;margin-top:5px}
-.line .li-price input{width:72px;padding:4px 7px;border:1px solid var(--line);border-radius:8px;text-align:right;font-size:12px}
-.qty{display:flex;align-items:center;gap:6px}
-.qbtn{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--line);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-weight:700;font-size:15px;background:#faf8f2;transition:.1s;cursor:pointer}
-.qbtn:hover{border-color:var(--primary);background:#e8f0ef}
-.qn{min-width:22px;text-align:center;font-weight:700;font-size:13px}
-.li-sub{min-width:58px;text-align:right;font-weight:700;font-size:12px}
-.li-rm{color:var(--danger);font-size:10px;margin-top:3px;font-weight:700;cursor:pointer}
-.cart-foot{border-top:1px solid var(--line);padding:12px 20px 16px;background:#faf8f2;flex-shrink:0}
-.note-in{width:100%;padding:8px 11px;border-radius:10px;border:1px solid var(--line);margin-bottom:8px;resize:none;outline:none;background:#fff;font-size:13px}
-.discount-row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:8px;margin-bottom:8px;padding:8px 11px;background:#fff;border-radius:10px;border:1px solid var(--line)}
-.disc-toggle{display:-webkit-flex;display:flex;background:#e8e3d8;border-radius:8px;padding:3px;gap:3px}
-.disc-toggle button{padding:4px 9px;border-radius:6px;font-size:12px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:.12s}
-.disc-toggle button.on{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.totals{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;font-size:12px}
-.totals .r{display:flex;justify-content:space-between;color:var(--muted);padding:2px 0}
-.totals .grand{font-size:20px;font-weight:900;color:var(--primary);display:flex;justify-content:space-between;padding-top:7px;border-top:1px solid var(--line)}
-.cart-btns{display:-webkit-flex;display:flex;gap:8px}
-.btn{padding:12px;border-radius:12px;font-weight:700;font-size:14px;transition:.12s;text-align:center;cursor:pointer}
-.btn.primary{background:var(--primary);color:#fff;border:none;-webkit-flex:2;flex:2}
-.btn.primary:hover{background:var(--primary-2)}
-.btn.primary:disabled{opacity:.4;cursor:not-allowed}
-.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--muted);-webkit-flex:1;flex:1}
-.btn.ghost:hover{border-color:var(--danger);color:var(--danger)}
-.cart-empty-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;color:var(--muted);text-align:center}
-.cart-empty-msg svg{width:44px;height:44px;stroke:var(--line);stroke-width:1.5;fill:none}
+.drawer{position:fixed;top:0;right:0;width:440px;max-width:100vw;height:100%;z-index:41;background:var(--paper);display:flex;flex-direction:column;
+  box-shadow:-12px 0 40px rgba(15,34,51,.16);transform:translateX(100%);visibility:hidden;
+  transition:transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear .3s}
+.drawer.open{transform:translateX(0);visibility:visible;transition:transform .3s cubic-bezier(.4,0,.2,1),visibility 0s}
+.drawer-head{display:flex;align-items:center;gap:10px;padding:16px 16px 14px 20px;border-bottom:1px solid var(--line);flex-shrink:0}
+.drawer-head h3{margin:0;font-size:20px;font-weight:900}
+.count-pill{font-size:12.5px;font-weight:700;color:var(--primary-ink);background:var(--sky-100);border-radius:99px;padding:3px 10px}
+.member-sel{padding:14px 20px 6px;flex-shrink:0}
+.member-sel .lbl{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.member-sel .row{display:flex;gap:8px}
+.member-sel select{flex:1;min-width:0}
+.cart-items{flex:1;overflow-y:auto;padding:0 20px}
+.line{padding:14px 0;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:none}
+.li-head{display:flex;gap:10px;align-items:flex-start}
+.li-nm{flex:1;min-width:0}
+.li-nm .c{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:2px}
+.li-nm .t{font-size:14px;font-weight:700;line-height:1.4}
+.li-rm{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--faint);flex-shrink:0;margin:-4px -6px 0 0;transition:background .15s,color .15s}
+.li-rm:hover{background:var(--danger-soft);color:var(--danger)}
+.li-rm svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.li-ctrl{display:flex;align-items:center;gap:10px;margin-top:10px}
+.li-price{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);font-weight:700}
+.li-price input{width:84px;height:36px;padding:0 10px;border:1.5px solid var(--line);border-radius:10px;text-align:right;font-size:14px;background:var(--bg);outline:none}
+.li-price input:focus{border-color:var(--sky-400);background:var(--paper);box-shadow:var(--ring)}
+.qty{margin-left:auto;display:flex;align-items:center;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:var(--paper)}
+.qbtn{width:36px;height:34px;display:grid;place-items:center;color:var(--primary);transition:background .1s}
+.qbtn:hover{background:var(--sky-50)}
+.qbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round}
+.qn{min-width:28px;text-align:center;font-weight:900;font-size:15px}
+.li-sub{min-width:78px;text-align:right;font-weight:900;font-size:15px}
+.cart-empty-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:56px 20px;color:var(--muted);text-align:center;font-size:14px;line-height:1.7}
+.cart-empty-msg svg{width:48px;height:48px;stroke:var(--sky-200);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.cart-foot{border-top:1px solid var(--line);padding:14px 20px calc(16px + var(--safe-b));background:var(--bg);flex-shrink:0}
+.note-in{display:block;width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);margin-bottom:10px;resize:none;outline:none;background:var(--paper);font-size:14px;line-height:1.5}
+.note-in:focus{border-color:var(--sky-400);box-shadow:var(--ring)}
+.discount-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.discount-row .lbl{font-size:13px;font-weight:700;color:var(--muted)}
+.disc-toggle{display:flex;background:var(--soft);border-radius:10px;padding:3px;gap:2px}
+.disc-toggle button{height:30px;padding:0 11px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);transition:background .12s,color .12s}
+.disc-toggle button.on{background:var(--paper);color:var(--primary);box-shadow:0 1px 3px rgba(15,34,51,.12)}
+.disc-in{flex:1;min-width:0;height:36px;padding:0 11px;border:1.5px solid var(--line);border-radius:10px;text-align:right;font-size:14px;background:var(--paper);outline:none}
+.disc-in:focus{border-color:var(--sky-400);box-shadow:var(--ring)}
+.totals{margin-bottom:12px}
+.totals .r{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;padding:2px 0}
+.totals .r.disc{color:var(--danger);font-weight:700}
+.totals .grand{display:flex;justify-content:space-between;align-items:baseline;padding-top:8px;margin-top:6px;border-top:1px dashed var(--line-2)}
+.totals .grand .l{font-size:15px;font-weight:700}
+.totals .grand .v{font-size:26px;font-weight:900;color:var(--primary-ink)}
+.cart-btns{display:flex;gap:10px}
+.cart-btns .btn{height:52px;font-size:16px}
 
 /* generic page */
-.page{flex:1;overflow-y:auto;padding:22px 26px;width:100%}
-.page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.page{flex:1;overflow-y:auto;padding:24px 28px 48px;width:100%}
+.page-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
 .page-head h2{margin:0;font-size:22px;font-weight:900}
+.page-head .hint{color:var(--muted);font-size:13px}
 .page-head .sp{flex:1}
-.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.panel-pad{padding:18px}
+.page-head .search{flex:0 1 280px;min-width:160px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.panel+.panel{margin-top:16px}
+.panel-pad{padding:14px}
+.panel-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:15px}
+.panel-title .hint{font-size:12px;color:var(--muted);font-weight:500}
+.tbl-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line);background:#faf8f2;position:sticky;top:0}
-td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:11px 16px;border-bottom:1px solid var(--line);background:#f8fbfd;position:sticky;top:0;white-space:nowrap;z-index:1}
+td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr.clk:hover{background:#faf8f2;cursor:pointer}
-.tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent-soft);color:var(--accent)}
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-.field label{font-size:12.5px;font-weight:700;color:var(--muted)}
-.field input,.field select,.field textarea{padding:11px 12px;border-radius:11px;border:1px solid var(--line);outline:none;background:#faf8f2}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);background:#fff}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
-.stat .k{font-size:12px;color:var(--muted);font-weight:700}
-.stat .v{font-size:26px;font-weight:900;margin-top:4px;color:var(--primary)}
-.mini{font-size:12px;color:var(--accent);font-weight:700;padding:6px 11px;border-radius:9px;background:var(--accent-soft)}
-.mini:hover{background:#f0d4bd}
-.mini.gray{background:#eee9dd;color:var(--muted)}
-.mini.red{background:#f7e0d9;color:var(--danger)}
+tr.clk{cursor:pointer;transition:background .1s}
+tr.clk:hover{background:var(--sky-50)}
+.ta-r{text-align:right!important}.ta-c{text-align:center}.nowrap{white-space:nowrap}
+.ellipsis{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.muted-cell{min-width:140px;max-width:220px;color:var(--muted);font-size:13px}
+.td-empty{text-align:center;color:var(--muted);padding:36px 16px!important}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--sky-100);color:var(--primary-ink);white-space:nowrap}
+.profit{color:var(--good)}
+.row-actions{text-align:right;white-space:nowrap}
+.row-actions .mini{margin-left:4px}
+.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--sky-100);color:var(--primary-ink);font-weight:900;font-size:13px;margin-right:10px;flex-shrink:0}
+.mem-name{display:flex;align-items:center;font-weight:700;white-space:nowrap}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field>label{font-size:13px;font-weight:700;color:var(--ink)}
+.field .req{color:var(--danger)}
+.field .help{font-size:12px;color:var(--muted);margin-top:6px}
+.field-row{display:flex;gap:10px}
+.field-row .field{flex:1;min-width:0}
+.margin-hint{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:10px 13px;border-radius:12px;background:var(--good-soft);color:var(--good);font-weight:700}
+.margin-hint.neg{background:var(--danger-soft);color:var(--danger)}
+
+/* records */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.seg{display:flex;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{height:34px;padding:0 13px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap;transition:background .12s,color .12s}
+.seg button:hover{color:var(--primary)}
+.seg button.on{background:var(--primary);color:#fff}
+.date-range{display:flex;align-items:center;gap:6px}
+.date-range span{color:var(--muted);font-size:13px}
+.filter-bar .input{height:42px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 18px;min-width:0}
+.stat .k{font-size:12.5px;color:var(--muted);font-weight:700}
+.stat .v{font-size:24px;font-weight:900;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:12px;color:var(--muted);margin-top:2px}
+.stat.hl{background:var(--sky-50);border-color:var(--sky-200)}
+.stat.hl .k,.stat.hl .v{color:var(--primary-ink)}
+.stat.good{background:var(--good-soft);border-color:#cdebd8}
+.stat.good .k,.stat.good .v{color:var(--good)}
+.two-col{margin-bottom:16px}
+.rank{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:900;background:var(--soft);color:var(--muted)}
+.rank.r1{background:var(--primary);color:#fff}
+.rank.r2{background:var(--sky-200);color:var(--primary-ink)}
+.rank.r3{background:var(--sky-100);color:var(--primary-ink)}
 
 /* category manager */
+.cat-layout{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.cat-side{flex:0 0 380px;min-width:260px}
+.cat-main{flex:1;min-width:280px}
 .cat-list{list-style:none;margin:0;padding:0}
-.cat-item{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;background:#fff;box-shadow:var(--shadow);transition:.15s}
-.cat-item:hover{border-color:#c8c2b2}
-.cat-order{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-flex-shrink:0;flex-shrink:0;margin-right:10px}
-.ord-btn{width:28px;height:26px;border-radius:7px;border:1px solid var(--line);background:#faf8f2;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;transition:.1s;cursor:pointer;margin-bottom:3px;padding:0;-webkit-appearance:none;appearance:none}
-.ord-btn:last-child{margin-bottom:0}
+.cat-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;background:var(--paper);transition:border-color .15s}
+.cat-item:last-child{margin-bottom:0}
+.cat-item:hover{border-color:var(--line-2)}
+.cat-order{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.ord-btn{width:28px;height:24px;border-radius:7px;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--muted);padding:0;transition:background .1s,color .1s,border-color .1s}
 .ord-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
-.ord-btn:disabled{opacity:.25;cursor:not-allowed;pointer-events:none}
-.ord-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
-.cat-item input{-webkit-flex:1;flex:1;border:none;background:transparent;font-size:15px;font-weight:700;outline:none;padding:6px;min-width:0;margin-right:10px}
-.cat-item input:focus{background:#faf8f2;border-radius:8px;padding:6px 8px}
-.cat-count{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;background:#eee9dd;padding:3px 9px;border-radius:99px;margin-right:10px}
+.ord-btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.ord-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;display:block}
+.cat-item input{flex:1;min-width:0;border:1.5px solid transparent;background:transparent;font-size:15px;font-weight:700;outline:none;padding:6px 8px;border-radius:9px;transition:background .15s,border-color .15s}
+.cat-item input:hover{background:var(--bg)}
+.cat-item input:focus{background:var(--paper);border-color:var(--sky-400);box-shadow:var(--ring)}
+.cat-del{width:34px;padding:0;justify-content:center;flex-shrink:0}
+.cat-count{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;background:var(--soft);padding:3px 9px;border-radius:99px}
+.cat-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.cat-tools .ttl{font-weight:700;font-size:15px}
+.cat-scroll{overflow-y:auto;max-height:calc(100vh - 280px);max-height:calc(100dvh - 280px)}
 
 /* modal */
-.mask{position:fixed;inset:0;background:rgba(28,33,30,.5);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;padding:20px}
-.mask.show{display:grid}
-.modal{background:var(--bg);border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
-.modal-head{display:flex;align-items:center;padding:18px 20px 0}
-.modal-head h3{margin:0;font-size:18px;font-weight:900}
-.modal-head .x,.modal-head .x-red{margin-left:auto}
-.modal-body{padding:18px 20px 20px}
-.modal-foot{display:flex;gap:10px;padding:0 20px 20px;justify-content:flex-end}
+.mask{position:fixed;inset:0;background:rgba(15,34,51,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;padding:20px}
+.mask.show{display:grid;animation:fadeIn .18s ease}
+.mask.show .modal{animation:popIn .24s cubic-bezier(.2,.9,.3,1)}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes popIn{from{opacity:0;transform:translateY(12px) scale(.98)}}
+.modal{background:var(--paper);border-radius:20px;max-width:560px;width:100%;max-height:90vh;max-height:90dvh;overflow:auto;box-shadow:var(--shadow-lg)}
+.modal-head{display:flex;align-items:center;gap:10px;padding:16px 16px 4px 22px}
+.modal-head h3{margin:0;font-size:18px;font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-body{padding:14px 22px 18px}
+.modal-foot{display:flex;gap:10px;padding:0 22px 22px;justify-content:flex-end}
+.del-confirm{flex-direction:column;align-items:stretch;gap:12px;padding:18px 22px 22px;background:var(--danger-soft);border-top:1px solid #f2cccc;text-align:center}
+.del-confirm>span{font-size:15px;font-weight:700;color:var(--danger)}
+.del-confirm .row{display:flex;gap:10px}
+.confirm-icon{width:52px;height:52px;border-radius:50%;background:var(--danger-soft);color:var(--danger);display:grid;place-items:center;margin:0 auto 14px}
+.confirm-icon svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.confirm-msg{font-size:16px;font-weight:700;line-height:1.6}
+.confirm-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6}
+.img-row{display:flex;align-items:center;gap:14px}
+.img-prev{width:56px;height:56px;border-radius:12px;border:1px solid var(--line);object-fit:cover;background:#000;display:block}
+.img-prev.fav{width:40px;height:40px;border-radius:9px;margin:8px}
+.img-actions{display:flex;gap:6px;flex-wrap:wrap}
+.img-row .help{margin-top:6px}
 
 /* receipt */
-.receipt{background:#fff;width:380px;margin:0 auto;padding:26px 26px 22px;color:#1c211e;border:1px solid var(--line)}
+.receipt{background:#fff;width:100%;max-width:380px;margin:0 auto;padding:26px 24px 22px;color:var(--ink);border:1px solid var(--line);border-radius:6px}
 .receipt .rc-top{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--primary);padding-bottom:14px}
-.receipt .rc-logo{width:46px;height:46px;border-radius:11px;background:linear-gradient(160deg,var(--accent),#c25f2e);display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px;text-align:center;line-height:1.05;overflow:hidden}
+.receipt .rc-logo{width:46px;height:46px;border-radius:11px;background:#000;display:grid;place-items:center;overflow:hidden;flex-shrink:0}
 .receipt .rc-logo img{width:100%;height:100%;object-fit:cover}
 .receipt .rc-store{font-size:17px;font-weight:900}
-.receipt .rc-tag{font-size:11px;color:var(--muted);font-weight:700}
-.receipt .rc-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:14px 0 8px}
-.receipt .rc-title{font-size:13px;font-weight:900;letter-spacing:3px;text-align:center;margin:6px 0 12px;color:var(--primary)}
+.receipt .rc-tag{font-size:11.5px;color:var(--muted);font-weight:700}
+.receipt .rc-meta{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin:14px 0 8px}
+.receipt .rc-title{font-size:13px;font-weight:900;letter-spacing:3px;text-align:center;margin:12px 0 4px;color:var(--primary)}
 .receipt table{font-size:12.5px}
-.receipt th{background:transparent;padding:6px 0;border-bottom:1px solid #1c211e;color:#1c211e;font-size:11px;position:static}
-.receipt td{padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.receipt th{background:transparent;padding:6px 0;border-bottom:1px solid var(--ink);color:var(--ink);font-size:11px;position:static}
+.receipt td{padding:8px 0;border-bottom:1px dashed var(--line-2);font-size:12.5px}
+.receipt th+th,.receipt td+td{padding-left:10px;white-space:nowrap}
+.receipt .rc-code{color:var(--muted);font-size:10.5px}
 .receipt .rc-tot{margin-top:12px;border-top:2px solid var(--primary);padding-top:10px;font-size:13px}
 .receipt .rc-tot .r{display:flex;justify-content:space-between;padding:3px 0;color:var(--muted)}
-.receipt .rc-tot .g{font-size:21px;font-weight:900;color:var(--primary);display:flex;justify-content:space-between;margin-top:4px}
+.receipt .rc-tot .r.disc{color:var(--danger)}
+.receipt .rc-tot .g{font-size:21px;font-weight:900;color:var(--primary-ink);display:flex;justify-content:space-between;margin-top:4px}
 .receipt .rc-foot{text-align:center;font-size:11px;color:var(--muted);margin-top:16px;line-height:1.7}
-.receipt .rc-note{font-size:12px;background:#faf8f2;border-radius:9px;padding:9px 11px;margin-top:12px;color:#444}
+.receipt .rc-note{font-size:12px;background:var(--sky-50);border-radius:9px;padding:9px 11px;margin-top:12px;color:var(--ink)}
 
 /* toast */
-.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
-  padding:13px 22px;border-radius:13px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:99;pointer-events:none}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;
+  font-weight:700;font-size:14px;opacity:0;transition:opacity .22s,transform .22s;z-index:99;pointer-events:none;
+  box-shadow:0 12px 30px -10px rgba(15,34,51,.5);max-width:calc(100vw - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sky-400);margin-right:9px;vertical-align:1px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+@media(min-width:1100px){
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .two-col .panel+.panel{margin-top:0}
+}
 @media(max-width:900px){
-  .app{grid-template-columns:1fr;grid-template-rows:1fr var(--rail)}
-  .rail{flex-direction:row;order:2;padding:6px;overflow-x:auto}
-  .brand{display:none}.rail-spacer{display:none}
-  .nav-btn{width:auto;flex:1;min-width:64px}
+  .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .rail{flex-direction:row;order:2;align-items:stretch;height:calc(var(--nav-h) + var(--safe-b));padding:4px 6px var(--safe-b);border-right:none;border-top:1px solid var(--line);gap:2px}
+  .brand,.rail-spacer{display:none}
+  .nav-btn{flex:1;width:auto;min-width:0;padding:4px 2px;justify-content:center;gap:2px;font-size:11px}
+  .nav-btn svg{width:52px;height:30px;padding:3px 14px;border-radius:99px;transition:background .15s}
+  .nav-btn:hover,.nav-btn.active{background:transparent}
+  .nav-btn.active svg{background:var(--sky-100)}
   .main{order:1}
+  .topbar{padding:10px 16px;gap:10px}
+  .topbar h1{font-size:16px}
+  .topbar .sub,.clock .d{display:none}
+  .catalog{padding:14px 16px 0}
+  .page{padding:18px 16px 32px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
   .drawer{width:100vw}
-  .fab{bottom:90px;right:18px}
+  .fab{bottom:calc(var(--nav-h) + var(--safe-b) + 14px);right:16px}
+  .toast{bottom:calc(var(--nav-h) + var(--safe-b) + 90px)}
+}
+@media(max-width:600px){
+  .card{padding:12px;border-radius:16px;gap:6px}
+  .card .nm{font-size:14px}
+  .card .price{font-size:19px}
+  .card .code,.result-count,.hide-sm{display:none}
+  .card .meta{min-height:28px}
+  .page-head h2{font-size:20px}
+  .page-head .search{flex:1 1 100%;order:5}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{padding:14px}
+  .stat .v{font-size:20px}
+  .filter-bar .seg{width:100%}
+  .seg button{flex:1;padding:0 4px}
+  .filter-bar select.input{flex:1}
+  .date-range{flex:1 1 100%}
+  .date-range .input{flex:1;min-width:0}
+  .cat-side{flex:1 1 100%}
+  .mask{place-items:end center;padding:0}
+  .modal{border-radius:22px 22px 0 0;max-height:92vh;max-height:92dvh;padding-bottom:var(--safe-b)}
+  .mask.show .modal{animation:sheetUp .28s cubic-bezier(.2,.9,.3,1)}
+  .receipt{padding:20px 16px}
+}
+@keyframes sheetUp{from{opacity:.4;transform:translateY(48px)}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <nav class="rail">
+  <nav class="rail" aria-label="主選單">
     <div class="brand" id="railLogo">sky</div>
     <button class="nav-btn active" data-view="pos" onclick="go('pos')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <!-- register body -->
+      <svg viewBox="0 0 24 24">
         <rect x="2" y="9" width="20" height="12" rx="2"/>
-        <!-- raised back panel with display -->
         <path d="M14 4h5a1 1 0 011 1v4H14V4z"/>
-        <!-- display line -->
         <path d="M15.5 6.5h3"/>
-        <!-- key buttons row -->
         <path d="M5 13.5h2.5M10 13.5h2.5M15 13.5h4"/>
-        <!-- cash drawer -->
         <rect x="3" y="17.5" width="8" height="2" rx="1"/>
       </svg>收銀</button>
     <button class="nav-btn" data-view="members" onclick="go('members')">
@@ -270,17 +457,15 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
     <button class="nav-btn" data-view="cats" onclick="go('cats')">
       <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="4" rx="1"/><rect x="4" y="13" width="16" height="4" rx="1"/></svg>分類</button>
     <button class="nav-btn" data-view="records" onclick="go('records')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <!-- chart bars -->
+      <svg viewBox="0 0 24 24">
         <rect x="3" y="12" width="4" height="9" rx="1"/>
         <rect x="9.5" y="7" width="4" height="14" rx="1"/>
         <rect x="16" y="3" width="4" height="18" rx="1"/>
-        <!-- baseline -->
         <path d="M2 21h20"/>
       </svg>後台</button>
     <div class="rail-spacer"></div>
     <button class="nav-btn" onclick="openSettings()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
       </svg>設定</button>
@@ -288,13 +473,13 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
 
   <div class="main">
     <header class="topbar">
-      <div>
+      <div class="ttl">
         <h1 id="storeTitle">美安台灣 POS</h1>
         <div class="sub">sky 銷售管理系統</div>
       </div>
       <div class="top-right">
-        <div class="sync-badge" id="syncStatus" title="雲端同步狀態">☁ 未連線</div>
-        <div class="clock"><div id="cDate"></div><div id="cTime" class="mono" style="font-weight:700;color:var(--ink);font-size:15px"></div></div>
+        <div class="sync-badge" id="syncStatus" title="雲端同步狀態">未連線</div>
+        <div class="clock"><div class="d" id="cDate"></div><div class="t mono" id="cTime"></div></div>
       </div>
     </header>
 
@@ -305,10 +490,12 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
           <div class="tools">
             <div class="search">
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-              <input id="search" placeholder="搜尋產品名稱或代號…" oninput="renderGrid();updateSearchClear()">
-              <button class="clear-btn" id="searchClear" onclick="$('search').value='';renderGrid();updateSearchClear()" title="清除">✕</button>
+              <input id="search" placeholder="搜尋產品名稱或代號…" autocomplete="off" enterkeyhint="search" oninput="onSearchInput()" onkeydown="onSearchKey(event)" aria-label="搜尋產品">
+              <span class="kbd" id="searchKbd" title="按 / 快速搜尋">/</span>
+              <button class="clear-btn" id="searchClear" onclick="clearSearch()" aria-label="清除搜尋" hidden><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
             </div>
-            <button class="mini" onclick="openAddProduct()">＋ 新增產品</button>
+            <button class="mini btn-add" onclick="openAddProduct()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增產品</button>
+            <span class="result-count" id="resultCount"></span>
           </div>
           <div class="chips" id="chips"></div>
           <div class="grid" id="grid"></div>
@@ -316,10 +503,10 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
       </div>
 
       <!-- FAB -->
-      <button class="fab empty-cart" id="fab" onclick="openDrawer()">
+      <button class="fab empty-cart" id="fab" onclick="openDrawer()" aria-label="開啟購物車">
         <div class="fab-icon">
           <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          <span class="fab-badge" id="fabBadge" style="display:none">0</span>
+          <span class="fab-badge" id="fabBadge" hidden>0</span>
         </div>
         <div class="fab-info">
           <span class="fab-label">購物車</span>
@@ -331,52 +518,60 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
       <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 
       <!-- Cart drawer -->
-      <div class="drawer" id="cartDrawer">
+      <aside class="drawer" id="cartDrawer" aria-label="購物車">
         <div class="drawer-head">
           <h3>購物車</h3>
-          <button onclick="closeDrawer()"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+          <span class="count-pill mono" id="drawerCount" hidden></span>
+          <button class="close-btn" onclick="closeDrawer()" aria-label="關閉購物車"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
         </div>
         <div class="member-sel">
-          <select id="cartMember"><option value="">— 散客 —</option></select>
-          <button class="icon-btn" title="新增會員" onclick="openMemberModal()">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          <label class="lbl" for="cartMember">顧客</label>
+          <div class="row">
+            <select id="cartMember" class="input"><option value="">— 散客 —</option></select>
+            <button class="icon-btn" title="新增會員" aria-label="新增會員" onclick="openMemberModal()">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
         </div>
         <div class="cart-items" id="cartItems"></div>
         <div class="cart-foot">
-          <textarea class="note-in" id="cartNote" rows="2" placeholder="備註（例：付款方式 / 訂單來源）"></textarea>
+          <textarea class="note-in" id="cartNote" rows="2" placeholder="備註（例：付款方式 / 訂單來源）" aria-label="備註"></textarea>
           <div class="discount-row">
-            <span style="font-size:13px;font-weight:700;color:var(--muted)">折扣</span>
-            <div class="disc-toggle">
+            <span class="lbl">折扣</span>
+            <div class="disc-toggle" role="group" aria-label="折扣方式">
               <button id="discTypePct" class="on" onclick="setDiscType('pct')">%</button>
               <button id="discTypeFixed" onclick="setDiscType('fixed')">NT$</button>
             </div>
-            <input class="mono" id="discVal" type="number" min="0" placeholder="0" oninput="updateDiscount()" style="width:80px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;text-align:right;font-size:14px">
-            <button class="mini gray" onclick="clearDiscount()" style="padding:6px 10px;font-size:12px">清除</button>
+            <input class="disc-in mono" id="discVal" type="number" min="0" inputmode="decimal" placeholder="0–100" oninput="updateDiscount()" aria-label="折扣數值">
+            <button class="mini gray" onclick="clearDiscount()">清除</button>
           </div>
           <div class="totals">
             <div class="r"><span>件數</span><span id="tCount" class="mono">0</span></div>
             <div class="r"><span>總 BV</span><span id="tBV" class="mono">0</span></div>
-            <div class="r" id="tDiscRow" style="display:none;color:var(--danger)"><span id="tDiscLabel">折扣</span><span id="tDisc" class="mono"></span></div>
-            <div class="grand"><span>合計</span><span class="mono" id="tGrand">NT$0</span></div>
+            <div class="r" id="tSubRow" hidden><span>小計</span><span id="tSub" class="mono"></span></div>
+            <div class="r disc" id="tDiscRow" hidden><span id="tDiscLabel">折扣</span><span id="tDisc" class="mono"></span></div>
+            <div class="grand"><span class="l">合計</span><span class="v mono" id="tGrand">NT$0</span></div>
           </div>
           <div class="cart-btns">
             <button class="btn ghost" onclick="clearCart()">清空</button>
             <button class="btn primary" id="checkoutBtn" onclick="checkout()" disabled>結帳</button>
           </div>
         </div>
-      </div>
+      </aside>
     </section>
 
     <!-- Members -->
     <section class="view" id="view-members">
       <div class="page">
-        <div class="page-head"><h2>會員管理</h2><div class="sp"></div>
-          <span class="mini gray" id="memCount"></span>
-          <button class="mini" onclick="openMemberModal()">＋ 新增會員</button></div>
-        <div class="panel" style="overflow:auto">
-          <table><thead><tr><th>姓名</th><th>電話</th><th>備註</th><th>消費筆數</th><th>累計金額</th><th></th></tr></thead>
+        <div class="page-head"><h2>會員管理</h2><span class="tag" id="memCount"></span><div class="sp"></div>
+          <div class="search sm">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input id="memSearch" placeholder="搜尋姓名、電話、備註…" autocomplete="off" oninput="renderMembers()" aria-label="搜尋會員">
+          </div>
+          <button class="mini" onclick="openMemberModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增會員</button></div>
+        <div class="panel"><div class="tbl-wrap">
+          <table><thead><tr><th>姓名</th><th>電話</th><th>備註</th><th class="ta-r">消費筆數</th><th class="ta-r">累計金額</th><th></th></tr></thead>
           <tbody id="memBody"></tbody></table>
-        </div>
+        </div></div>
       </div>
     </section>
 
@@ -384,26 +579,26 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
     <section class="view" id="view-cats">
       <div class="page">
         <div class="page-head"><h2>分類管理</h2>
-          <span class="sub" style="color:var(--muted);font-size:13px">點 ↑ ↓ 調整順序，同步到收銀台</span>
+          <span class="hint">用 ↑ ↓ 調整順序、點名稱直接改名，會同步到收銀台</span>
           <div class="sp"></div>
-          <button class="mini" onclick="openAddCatModal()">＋ 新增分類</button></div>
-        <div style="display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:18px;align-items:start">
-          <div class="panel panel-pad" style="-webkit-flex:0 0 320px;flex:0 0 320px;min-width:260px">
+          <button class="mini" onclick="openAddCatModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增分類</button></div>
+        <div class="cat-layout">
+          <div class="panel panel-pad cat-side">
             <ul class="cat-list" id="catList"></ul>
           </div>
-          <div class="panel" style="-webkit-flex:1;flex:1;min-width:280px;overflow:hidden">
-            <div style="padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-              <span style="font-weight:700;font-size:14px">產品分類指派</span>
-              <select id="catFilter" onchange="renderProdCatList()" style="padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#faf8f2;font-size:13px">
+          <div class="panel cat-main">
+            <div class="cat-tools">
+              <span class="ttl">產品分類指派</span>
+              <select id="catFilter" class="input sm" onchange="renderProdCatList()" aria-label="篩選分類">
                 <option value="all">全部產品</option>
               </select>
-              <div class="search" style="flex:1;min-width:150px">
+              <div class="search sm">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-                <input id="catProdSearch" placeholder="搜尋產品…" oninput="renderProdCatList()" style="padding:8px 10px 8px 36px;font-size:13px">
+                <input id="catProdSearch" placeholder="搜尋產品…" autocomplete="off" oninput="renderProdCatList()" aria-label="搜尋產品">
               </div>
             </div>
-            <div style="overflow-y:auto;max-height:calc(100vh - 280px)">
-              <table><thead><tr><th>產品名稱</th><th>代號</th><th style="min-width:140px">所屬分類</th></tr></thead>
+            <div class="cat-scroll">
+              <table><thead><tr><th>產品名稱</th><th>代號</th><th style="min-width:150px">所屬分類</th></tr></thead>
               <tbody id="prodCatBody"></tbody></table>
             </div>
           </div>
@@ -415,42 +610,47 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
     <section class="view" id="view-records">
       <div class="page">
         <div class="page-head"><h2>後台 · 消費記錄</h2><div class="sp"></div>
-          <button class="mini gray" onclick="exportBackup()">匯出備份</button>
-          <button class="mini gray" onclick="document.getElementById('importFile').click()">匯入備份</button>
-          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importBackup(event)">
+          <button class="mini gray" onclick="exportBackup()"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出<span class="hide-sm">備份</span></button>
+          <button class="mini gray" onclick="$('importFile').click()"><svg viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>匯入<span class="hide-sm">備份</span></button>
+          <input type="file" id="importFile" accept="application/json" hidden onchange="importBackup(event)">
+        </div>
+        <div class="filter-bar">
+          <div class="seg" id="rangeSeg" role="group" aria-label="日期區間">
+            <button data-r="today" onclick="setRange('today')">今天</button>
+            <button data-r="week" onclick="setRange('week')">本週</button>
+            <button data-r="month" onclick="setRange('month')">本月</button>
+            <button data-r="last" onclick="setRange('last')">上月</button>
+            <button data-r="all" onclick="setRange('all')">全部</button>
+          </div>
+          <select id="fMember" class="input" onchange="renderRecords()" aria-label="篩選會員"><option value="">全部會員</option></select>
+          <div class="date-range">
+            <input type="date" id="fFrom" class="input" onchange="renderRecords()" aria-label="開始日期">
+            <span>至</span>
+            <input type="date" id="fTo" class="input" onchange="renderRecords()" aria-label="結束日期">
+          </div>
+          <button class="mini gray" onclick="clearRecFilters()">清除篩選</button>
         </div>
         <div class="stat-grid" id="statGrid"></div>
-        <div class="page-head" style="margin-bottom:12px">
-          <select id="fMember" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff"><option value="">全部會員</option></select>
-          <input type="date" id="fFrom" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff">
-          <span style="color:var(--muted)">至</span>
-          <input type="date" id="fTo" onchange="renderRecords()" style="padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:#fff">
-          <button class="mini gray" onclick="document.getElementById('fMember').value='';document.getElementById('fFrom').value='';document.getElementById('fTo').value='';renderRecords()">清除</button>
-        </div>
-        <div class="panel" style="overflow:auto;margin-bottom:18px">
-          <div style="padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px">
-            <span>🏆 業績前三名顧客</span>
-            <span style="font-size:12px;color:var(--muted);font-weight:400">依篩選條件計算</span>
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-title">業績前三名顧客<span class="hint">依篩選條件計算</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th style="width:60px">排名</th><th>顧客</th><th class="ta-r">筆數</th><th class="ta-r">累計消費</th></tr></thead>
+              <tbody id="topMembersTable"></tbody>
+            </table></div>
           </div>
-          <table>
-            <thead><tr><th>排名</th><th>顧客</th><th style="text-align:right">筆數</th><th style="text-align:right">累計消費</th></tr></thead>
-            <tbody id="topMembersTable"></tbody>
-          </table>
-        </div>
-
-        <div class="panel" style="overflow:auto;margin-bottom:18px">
-          <div style="padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px">
-            <span>分類利潤分析</span>
-            <span style="font-size:12px;color:var(--muted);font-weight:400">依篩選條件計算</span>
+          <div class="panel">
+            <div class="panel-title">分類利潤分析<span class="hint">依篩選條件計算</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>分類</th><th class="ta-r">件數</th><th class="ta-r">實際利潤</th></tr></thead>
+              <tbody id="spreadTable"></tbody>
+            </table></div>
           </div>
-          <table>
-            <thead><tr><th>分類</th><th style="text-align:right">件數</th><th style="text-align:right;color:#1a6abf">實際利潤</th></tr></thead>
-            <tbody id="spreadTable"></tbody>
-          </table>
         </div>
-        <div class="panel" style="overflow:auto">
-          <table><thead><tr><th>時間</th><th>會員</th><th>明細</th><th>件數</th><th>BV</th><th>金額</th><th style="color:#1a6abf">利潤</th><th></th></tr></thead>
-          <tbody id="recBody"></tbody></table>
+        <div class="panel">
+          <div class="panel-title">消費明細<span class="hint" id="recHint"></span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>時間</th><th>會員</th><th>明細</th><th class="ta-r">件數</th><th class="ta-r">BV</th><th class="ta-r">金額</th><th class="ta-r">利潤</th><th></th></tr></thead>
+          <tbody id="recBody"></tbody></table></div>
         </div>
       </div>
     </section>
@@ -458,123 +658,141 @@ tr.clk:hover{background:#faf8f2;cursor:pointer}
 </div>
 
 <!-- product edit modal -->
-<div class="mask" id="prodMask">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-head"><h3 id="prodModalTitle">編輯產品</h3><button class="x" onclick="closeMask('prodMask')"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+<div class="mask" id="prodMask" role="dialog" aria-modal="true" aria-labelledby="prodModalTitle">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><h3 id="prodModalTitle">編輯產品</h3><button class="close-btn" onclick="closeMask('prodMask')" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
-      <div class="field"><label>產品代號 *</label><input id="epCode" placeholder="例：T12345"></div>
-      <div class="field"><label>品名 *</label><input id="epName" placeholder="產品名稱"></div>
-      <div class="field"><label>分類</label><select id="epCat"></select></div>
-      <div style="display:-webkit-flex;display:flex;gap:10px">
-        <div class="field" style="width:80px;flex-shrink:0"><label>BV</label><input id="epBV" type="number" step="0.5" placeholder="0"></div>
-        <div class="field" style="-webkit-flex:1;flex:1;min-width:100px"><label>成本價</label><input id="epCost" type="number" placeholder="0"></div>
-        <div class="field" style="-webkit-flex:1;flex:1;min-width:100px"><label>零售價</label><input id="epRetail" type="number" placeholder="0"></div>
+      <div class="field-row">
+        <div class="field"><label for="epCode">產品代號 <span class="req">*</span></label><input id="epCode" placeholder="例：T12345" autocomplete="off"></div>
+        <div class="field"><label for="epCat">分類</label><select id="epCat"></select></div>
       </div>
+      <div class="field"><label for="epName">品名 <span class="req">*</span></label><input id="epName" placeholder="產品名稱" autocomplete="off"></div>
+      <div class="field-row">
+        <div class="field" style="flex:0 0 84px"><label for="epBV">BV</label><input id="epBV" type="number" step="0.5" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="epCost">成本價</label><input id="epCost" type="number" inputmode="numeric" placeholder="0" oninput="updateMarginHint()"></div>
+        <div class="field"><label for="epRetail">零售價</label><input id="epRetail" type="number" inputmode="numeric" placeholder="0" oninput="updateMarginHint()"></div>
+      </div>
+      <div class="margin-hint" id="epMargin" hidden></div>
     </div>
     <div class="modal-foot">
-      <button class="btn ghost" id="prodDelBtn" onclick="deleteProduct()" style="color:var(--danger);border-color:#f0c9bd;display:none">刪除產品</button>
+      <button class="btn danger-ghost" id="prodDelBtn" onclick="deleteProduct()" hidden>刪除</button>
       <button class="btn ghost" onclick="closeMask('prodMask')">取消</button>
-      <button class="btn primary" onclick="saveProduct()">儲存</button>
+      <button class="btn primary" data-submit onclick="saveProduct()">儲存</button>
     </div>
   </div>
 </div>
 
 <!-- receipt / detail modal -->
-<div class="mask" id="recMask">
+<div class="mask" id="recMask" role="dialog" aria-modal="true" aria-labelledby="recModalTitle">
   <div class="modal">
-    <div class="modal-head"><h3 id="recModalTitle">消費明細</h3><button class="x-red" onclick="closeMask('recMask')"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-head"><h3 id="recModalTitle">消費明細</h3><button class="close-btn" onclick="closeMask('recMask')" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
       <div id="receiptHost"></div>
     </div>
     <div class="modal-foot" id="recFootNormal">
-      <button class="btn ghost" id="recDelBtn" onclick="showDelConfirm()" style="display:none;color:var(--danger);border-color:#f0c9bd">刪除此筆</button>
+      <button class="btn danger-ghost" id="recDelBtn" onclick="showDelConfirm()" hidden>刪除此筆</button>
       <button class="btn ghost" onclick="closeMask('recMask')">關閉</button>
-      <button class="btn primary" onclick="exportReceipt()">匯出 JPG</button>
+      <button class="btn primary" onclick="exportReceipt()"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>匯出 JPG</button>
     </div>
-    <div class="modal-foot" id="recFootConfirm" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 20px;background:#fff3f1;border-top:1px solid #f0c9bd;border-radius:0 0 20px 20px;text-align:center">
-      <span style="font-size:15px;font-weight:700;color:var(--danger)">確定刪除這筆消費記錄？</span>
-      <div style="display:flex;gap:10px;width:100%">
-        <button class="btn ghost" onclick="hideDelConfirm()" style="flex:1">取消</button>
-        <button class="btn primary" onclick="deleteCurrentTxn()" style="flex:2;background:var(--danger)">確定刪除</button>
+    <div class="modal-foot del-confirm" id="recFootConfirm" hidden>
+      <span>確定刪除這筆消費記錄？</span>
+      <div class="row">
+        <button class="btn ghost" onclick="hideDelConfirm()">取消</button>
+        <button class="btn danger" onclick="deleteCurrentTxn()" style="flex:2">確定刪除</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- member modal -->
-<div class="mask" id="memberMask">
+<div class="mask" id="memberMask" role="dialog" aria-modal="true" aria-labelledby="memberModalTitle">
   <div class="modal" style="max-width:420px">
-    <div class="modal-head"><h3 id="memberModalTitle">新增會員</h3><button class="x" onclick="closeMask('memberMask')"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-head"><h3 id="memberModalTitle">新增會員</h3><button class="close-btn" onclick="closeMask('memberMask')" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
-      <div class="field"><label>姓名 *</label><input id="mName" placeholder="會員姓名"></div>
-      <div class="field"><label>電話</label><input id="mPhone" placeholder="連絡電話" inputmode="tel"></div>
-      <div class="field"><label>備註</label><textarea id="mNote" rows="3" placeholder="會員編號 / 推薦人 / 其他"></textarea></div>
+      <div class="field"><label for="mName">姓名 <span class="req">*</span></label><input id="mName" placeholder="會員姓名" autocomplete="off"></div>
+      <div class="field"><label for="mPhone">電話</label><input id="mPhone" placeholder="連絡電話" inputmode="tel" autocomplete="off"></div>
+      <div class="field"><label for="mNote">備註</label><textarea id="mNote" rows="3" placeholder="會員編號 / 推薦人 / 其他"></textarea></div>
       <input type="hidden" id="mEditId">
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeMask('memberMask')">取消</button>
-      <button class="btn primary" onclick="saveMember()">儲存</button>
+      <button class="btn primary" data-submit onclick="saveMember()">儲存</button>
     </div>
   </div>
 </div>
 
 <!-- add category modal -->
-<div class="mask" id="addCatMask">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-head"><h3>新增分類</h3><button class="x" onclick="closeMask('addCatMask')"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+<div class="mask" id="addCatMask" role="dialog" aria-modal="true" aria-labelledby="addCatTitle">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head"><h3 id="addCatTitle">新增分類</h3><button class="close-btn" onclick="closeMask('addCatMask')" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
       <div class="field">
-        <label>分類名稱</label>
-        <input id="newCatName" placeholder="輸入分類名稱…" onkeydown="if(event.key==='Enter')addCat()">
+        <label for="newCatName">分類名稱</label>
+        <input id="newCatName" placeholder="輸入分類名稱…" autocomplete="off">
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeMask('addCatMask')">取消</button>
-      <button class="btn primary" onclick="addCat()">新增</button>
+      <button class="btn primary" data-submit onclick="addCat()">新增</button>
     </div>
   </div>
 </div>
 
 <!-- confirm modal -->
-<div class="mask" id="confirmMask">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-body" style="text-align:center;padding:30px 24px 16px">
-      <div id="confirmMsg" style="font-size:16px;font-weight:700;line-height:1.6;color:var(--ink)"></div>
-      <div id="confirmSub" style="font-size:13px;color:var(--muted);margin-top:6px"></div>
+<div class="mask" id="confirmMask" role="alertdialog" aria-modal="true" aria-labelledby="confirmMsg">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-body" style="text-align:center;padding:28px 24px 18px">
+      <div class="confirm-icon"><svg viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+      <div id="confirmMsg" class="confirm-msg"></div>
+      <div id="confirmSub" class="confirm-sub"></div>
     </div>
-    <div class="modal-foot" style="justify-content:center;gap:12px;padding-bottom:24px">
-      <button class="btn ghost" style="flex:1" onclick="closeMask('confirmMask')">取消</button>
-      <button class="btn primary" id="confirmOkBtn" style="flex:1">確定</button>
+    <div class="modal-foot" style="padding-bottom:24px">
+      <button class="btn ghost" onclick="closeMask('confirmMask')">取消</button>
+      <button class="btn danger" id="confirmOkBtn">確定</button>
     </div>
   </div>
 </div>
 
 <!-- settings modal -->
-<div class="mask" id="setMask">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-head"><h3>設定</h3><button class="x" onclick="closeMask('setMask')"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+<div class="mask" id="setMask" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head"><h3 id="setTitle">設定</h3><button class="close-btn" onclick="closeMask('setMask')" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
-      <div class="field"><label>店家 / 品牌名稱</label><input id="setStore"></div>
-      <div class="field"><label>收據抬頭副標</label><input id="setTag"></div>
-      <div class="field"><label>商店 Logo（顯示於收據與側欄）</label>
-        <input type="file" id="setLogo" accept="image/*" onchange="onLogoPick(event)">
-        <div id="logoPreview" style="margin-top:8px"></div>
+      <div class="field"><label for="setStore">店家 / 品牌名稱</label><input id="setStore" autocomplete="off"></div>
+      <div class="field"><label for="setTag">收據抬頭副標</label><input id="setTag" autocomplete="off"></div>
+      <div class="field"><label>商店 Logo</label>
+        <div class="img-row">
+          <div id="logoPreview"></div>
+          <div>
+            <div class="img-actions">
+              <label class="mini">選擇圖片<input type="file" id="setLogo" accept="image/*" onchange="onLogoPick(event)" hidden></label>
+              <button class="mini gray" onclick="clearLogo()">還原預設</button>
+            </div>
+            <div class="help" id="logoState"></div>
+          </div>
+        </div>
       </div>
-      <button class="mini red" onclick="clearLogo()">還原預設 Logo</button>
-      <div class="field" style="margin-top:16px"><label>Favicon（瀏覽器分頁小圖示）</label>
-        <input type="file" id="setFavicon" accept="image/*" onchange="onFaviconPick(event)">
-        <div id="favPreview" style="margin-top:8px"></div>
+      <div class="field"><label>Favicon（瀏覽器分頁小圖示）</label>
+        <div class="img-row">
+          <div id="favPreview"></div>
+          <div>
+            <div class="img-actions">
+              <label class="mini">選擇圖片<input type="file" id="setFavicon" accept="image/*" onchange="onFaviconPick(event)" hidden></label>
+              <button class="mini gray" onclick="clearFavicon()">還原預設</button>
+            </div>
+            <div class="help" id="favState"></div>
+          </div>
+        </div>
       </div>
-      <button class="mini red" onclick="clearFavicon()">還原預設 Favicon</button>
     </div>
     <div class="modal-foot">
       <button class="btn ghost" onclick="closeMask('setMask')">取消</button>
-      <button class="btn primary" onclick="saveSettings()">儲存設定</button>
+      <button class="btn primary" data-submit onclick="saveSettings()">儲存設定</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ============ storage ============ */
@@ -610,7 +828,11 @@ const firebaseConfig = {
 const CLOUD_COL='posData', CLOUD_DOC='store1';
 let cloudDb=null, cloudReady=false, applyingRemote=false, cloudPushTimer=null;
 
-function setSyncBadge(text,cls){const el=$('syncStatus');if(!el)return;el.textContent=text;el.className='sync-badge '+(cls||'');}
+function setSyncBadge(text,cls,tip){
+  const el=$('syncStatus');if(!el)return;
+  el.textContent=text;el.className='sync-badge '+(cls||'');
+  el.title=tip||({on:'資料已同步到雲端',syncing:'正在與雲端同步'}[cls])||'雲端同步狀態';
+}
 
 function applyRemoteState(data){
   applyingRemote=true;
@@ -631,20 +853,20 @@ function pushCloud(){
   if(!cloudReady||applyingRemote||!cloudDb)return;
   clearTimeout(cloudPushTimer);
   cloudPushTimer=setTimeout(()=>{
-    setSyncBadge('☁ 同步中…','syncing');
+    setSyncBadge('同步中…','syncing');
     cloudDb.collection(CLOUD_COL).doc(CLOUD_DOC).set(JSON.parse(JSON.stringify(S)))
-      .then(()=>setSyncBadge('☁ 已同步','on'))
-      .catch(()=>setSyncBadge('⚠ 同步失敗（僅本機）','off'));
+      .then(()=>setSyncBadge('已同步','on'))
+      .catch(()=>setSyncBadge('同步失敗','off','雲端同步失敗，資料已存在這台裝置'));
   },350);
 }
 
 function initCloud(){
-  if(typeof firebase==='undefined'){setSyncBadge('☁ 未連線（僅本機）','off');return;}
+  if(typeof firebase==='undefined'){setSyncBadge('僅本機','off','雲端元件未載入，資料只存在這台裝置');return;}
   try{
     firebase.initializeApp(firebaseConfig);
     cloudDb=firebase.firestore();
-    setSyncBadge('☁ 連線中…','syncing');
-    firebase.auth().signInAnonymously().catch(()=>setSyncBadge('☁ 連線失敗（僅本機）','off'));
+    setSyncBadge('連線中…','syncing');
+    firebase.auth().signInAnonymously().catch(()=>setSyncBadge('連線失敗','off','無法登入雲端，資料只存在這台裝置'));
     firebase.auth().onAuthStateChanged(user=>{
       if(!user)return;
       const ref=cloudDb.collection(CLOUD_COL).doc(CLOUD_DOC);
@@ -652,23 +874,31 @@ function initCloud(){
         if(snap.exists){
           applyRemoteState(snap.data());
           cloudReady=true;
-          setSyncBadge('☁ 已同步','on');
+          setSyncBadge('已同步','on');
         } else {
           cloudReady=true;
-          ref.set(JSON.parse(JSON.stringify(S))).then(()=>setSyncBadge('☁ 已同步','on'));
+          ref.set(JSON.parse(JSON.stringify(S))).then(()=>setSyncBadge('已同步','on'));
         }
-      },()=>setSyncBadge('☁ 連線中斷（使用本機）','off'));
+      },()=>setSyncBadge('連線中斷','off','雲端連線中斷，暫時使用本機資料'));
     });
-  }catch(e){setSyncBadge('☁ 初始化失敗（僅本機）','off');}
+  }catch(e){setSyncBadge('僅本機','off','雲端初始化失敗，資料只存在這台裝置');}
 }
 
 /* ============ helpers ============ */
 const $=id=>document.getElementById(id);
-const money=n=>'NT$'+Math.round(n).toLocaleString('en-US');
+const money=n=>{const r=Math.round(n);return (r<0?'-':'')+'NT$'+Math.abs(r).toLocaleString('en-US');};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const localDay=iso=>ymd(new Date(iso));
+const fmtDT=d=>d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function catName(id){const c=S.cats.find(c=>c.id===id);return c?c.name:'未分類';}
+function replayAnim(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
+const ICON_X='<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+const ICON_SEARCH='<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>';
+const ICON_BAG='<svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>';
 
 /* ============ nav ============ */
 function go(v){
@@ -683,35 +913,65 @@ function go(v){
 /* ============ POS ============ */
 let activeCat='all';
 function renderChips(){
-  let h='<button class="chip '+(activeCat==='all'?'active':'')+'" onclick="setCat(\'all\')">全部</button>';
-  S.cats.forEach(c=>{ h+='<button class="chip '+(activeCat===c.id?'active':'')+'" onclick="setCat(\''+c.id+'\')">'+esc(c.name)+'</button>'; });
+  const counts={};S.products.forEach(p=>counts[p.cat]=(counts[p.cat]||0)+1);
+  let h=`<button class="chip ${activeCat==='all'?'active':''}" onclick="setCat('all')">全部<span class="n">${S.products.length}</span></button>`;
+  S.cats.forEach(c=>{ h+=`<button class="chip ${activeCat===c.id?'active':''}" onclick="setCat('${c.id}')">${esc(c.name)}<span class="n">${counts[c.id]||0}</span></button>`; });
   $('chips').innerHTML=h;
 }
-function setCat(id){activeCat=id;renderChips();renderGrid();}
+function setCat(id){activeCat=id;renderChips();renderGrid();$('grid').scrollTop=0;}
+function cartQtyMap(){const q={};cart.items.forEach(i=>q[i.code]=(q[i.code]||0)+i.qty);return q;}
 function renderGrid(){
-  const q=($('search').value||'').trim().toLowerCase();
+  const raw=($('search').value||'').trim(), q=raw.toLowerCase();
   let list=S.products.filter(p=> (activeCat==='all'||p.cat===activeCat)
     && (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)));
   const order={}; S.cats.forEach((c,i)=>order[c.id]=i);
   list.sort((a,b)=>(order[a.cat]??99)-(order[b.cat]??99));
-  if(!list.length){$('grid').innerHTML='<div class="empty">找不到符合的產品</div>';return;}
-  $('grid').innerHTML=list.map(p=>`
-    <button class="card" onclick="addToCart('${p.code}')">
-      <span class="edit" onclick="event.stopPropagation();editProduct('${p.code}')"><svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M14 6l4 4"/></svg></span>
-      ${activeCat==='all'?`<span class="cat-tag">${esc(catName(p.cat))}</span>`:''}
+  $('resultCount').textContent=list.length+' 項產品';
+  if(!list.length){
+    $('grid').innerHTML=`<div class="empty">${ICON_SEARCH}<div>${q?`找不到「${esc(raw)}」相關產品`:'這個分類還沒有產品'}</div>${q?'<button class="mini" onclick="clearSearch()">清除搜尋</button>':''}</div>`;
+    return;
+  }
+  const qm=cartQtyMap();
+  $('grid').innerHTML=list.map(p=>{const n=qm[p.code]||0;return `
+    <button class="card${n?' in-cart':''}" data-code="${esc(p.code)}" onclick="addToCart(this.dataset.code)">
+      <span class="top">${activeCat==='all'?`<span class="cat-tag">${esc(catName(p.cat))}</span>`:''}<span class="qty-badge mono"${n?'':' hidden'}>×${n}</span></span>
       <span class="nm">${esc(p.name)}</span>
       <span class="price mono">${money(p.retail)}</span>
-      <span class="bv-pill">BV ${p.bv}</span>
-    </button>`).join('');
+      <span class="meta">
+        <span class="bv-pill">BV ${p.bv}</span><span class="code mono">${esc(p.code)}</span>
+        <span class="edit" title="編輯產品" aria-label="編輯產品" onclick="event.stopPropagation();editProduct(this.closest('.card').dataset.code)"><svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M14 6l4 4"/></svg></span>
+      </span>
+    </button>`;}).join('');
+}
+function syncCardBadges(){
+  const qm=cartQtyMap();
+  document.querySelectorAll('#grid .card').forEach(c=>{
+    const n=qm[c.dataset.code]||0, b=c.querySelector('.qty-badge');
+    c.classList.toggle('in-cart',n>0);
+    if(b){b.textContent='×'+n;b.hidden=!n;}
+  });
 }
 function addToCart(code){
   const p=S.products.find(p=>p.code===code);if(!p)return;
-  const wasEmpty=!cart.items.length;
-  const ex=cart.items.find(i=>i.code===code);
-  if(ex){ex.qty++;}
-  else cart.items.push({code:p.code,name:p.name,bv:p.bv,price:p.retail,qty:1});
+  let it=cart.items.find(i=>i.code===code);
+  if(it)it.qty++;
+  else cart.items.push(it={code:p.code,name:p.name,bv:p.bv,price:p.retail,qty:1});
   renderCart();
-  if(wasEmpty)openDrawer();
+  replayAnim([...document.querySelectorAll('#grid .card')].find(c=>c.dataset.code===code),'bump');
+  replayAnim($('fab'),'bump');
+  toast('已加入 '+p.name+(it.qty>1?' ×'+it.qty:''));
+}
+function onSearchInput(){renderGrid();updateSearchClear();}
+function clearSearch(){$('search').value='';renderGrid();updateSearchClear();$('search').focus();}
+function updateSearchClear(){const has=!!$('search').value;$('searchClear').hidden=!has;$('searchKbd').hidden=has;}
+function onSearchKey(e){
+  if(e.key!=='Enter'||e.isComposing||e.keyCode===229)return;
+  const q=$('search').value.trim().toLowerCase();if(!q)return;
+  const cards=[...document.querySelectorAll('#grid .card')];
+  const hit=cards.find(c=>c.dataset.code.toLowerCase()===q)||(cards.length===1?cards[0]:null);
+  e.preventDefault();
+  if(hit){addToCart(hit.dataset.code);$('search').select();}
+  else if(cards.length)toast('找到 '+cards.length+' 項，請點選要加入的產品');
 }
 function setDiscType(t){
   cart.discount.type=t;
@@ -722,12 +982,12 @@ function setDiscType(t){
 }
 function updateDiscount(){
   cart.discount.value=Math.max(0,Number($('discVal').value)||0);
-  renderCart();
+  renderCartTotals();
 }
 function clearDiscount(){
   cart.discount={type:cart.discount.type,value:0};
   $('discVal').value='';
-  renderCart();
+  renderCartTotals();
 }
 function calcDiscount(subtotal){
   const d=cart.discount;
@@ -737,53 +997,66 @@ function calcDiscount(subtotal){
 }
 function openDrawer(){$('cartDrawer').classList.add('open');$('drawerOverlay').classList.add('open');}
 function closeDrawer(){$('cartDrawer').classList.remove('open');$('drawerOverlay').classList.remove('open');}
-function renderCart(){
+function renderCart(){renderCartLines();renderCartTotals();syncCardBadges();}
+function renderCartLines(){
+  const box=$('cartItems');
+  if(!cart.items.length){
+    box.innerHTML=`<div class="cart-empty-msg">${ICON_BAG}<div>購物車是空的<br>點選左側產品即可加入</div></div>`;
+    return;
+  }
+  box.innerHTML=cart.items.map((it,idx)=>`
+    <div class="line">
+      <div class="li-head">
+        <div class="li-nm">
+          <div class="c mono">${esc(it.code)}</div>
+          <div class="t">${esc(it.name)}</div>
+        </div>
+        <button class="li-rm" onclick="rmLine(${idx})" title="移除" aria-label="移除 ${esc(it.name)}"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+      </div>
+      <div class="li-ctrl">
+        <label class="li-price">NT$<input class="mono" type="number" min="0" inputmode="numeric" value="${it.price}" oninput="setPrice(${idx},this.value)" aria-label="單價"></label>
+        <div class="qty">
+          <button class="qbtn" onclick="chQty(${idx},-1)" aria-label="減少數量"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+          <span class="qn mono">${it.qty}</span>
+          <button class="qbtn" onclick="chQty(${idx},1)" aria-label="增加數量"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="li-sub mono" id="liSub${idx}">${money(it.price*it.qty)}</div>
+      </div>
+    </div>`).join('');
+}
+function renderCartTotals(){
   const count=cart.items.reduce((s,i)=>s+i.qty,0);
   const bv=cart.items.reduce((s,i)=>s+i.bv*i.qty,0);
   const subtotal=cart.items.reduce((s,i)=>s+i.price*i.qty,0);
   const discAmt=calcDiscount(subtotal);
   const grand=subtotal-discAmt;
-  // update FAB
+  // FAB
   $('fabBadge').textContent=count;
-  $('fabBadge').style.display=count?'flex':'none';
+  $('fabBadge').hidden=!count;
   $('fabTotal').textContent=money(grand);
   $('fab').classList.toggle('empty-cart',!count);
-  // discount display
-  if(discAmt>0){
-    const label=cart.discount.type==='pct'?`折扣 ${cart.discount.value}%`:`折扣 -NT$${cart.discount.value}`;
-    $('tDiscLabel').textContent=label;
+  $('fab').setAttribute('aria-label',count?`開啟購物車，共 ${count} 件，合計 ${money(grand)}`:'開啟購物車');
+  $('drawerCount').textContent=count+' 件';
+  $('drawerCount').hidden=!count;
+  // discount
+  const hasDisc=discAmt>0;
+  $('tSubRow').hidden=!hasDisc;
+  $('tDiscRow').hidden=!hasDisc;
+  if(hasDisc){
+    $('tSub').textContent=money(subtotal);
+    $('tDiscLabel').textContent=cart.discount.type==='pct'?`折扣 ${cart.discount.value}%`:'折扣';
     $('tDisc').textContent='-'+money(discAmt);
-    $('tDiscRow').style.display='flex';
-  } else {
-    $('tDiscRow').style.display='none';
-  }
-  // drawer items
-  const box=$('cartItems');
-  if(!cart.items.length){
-    box.innerHTML=`<div class="cart-empty-msg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div>尚無商品<br>點選產品加入購物車</div></div>`;
-  } else {
-    box.innerHTML=cart.items.map((it,idx)=>`
-      <div class="line">
-        <div class="li-nm">
-          <div class="c mono">${esc(it.code)}</div>
-          <div class="t">${esc(it.name)}</div>
-          <div class="li-price">NT$<input class="mono" type="number" value="${it.price}" oninput="setPrice(${idx},this.value)"></div>
-        </div>
-        <div style="display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:flex-end;align-items:flex-end;gap:6px">
-          <div class="qty">
-            <button class="qbtn" onclick="chQty(${idx},-1)">−</button>
-            <span class="qn mono">${it.qty}</span>
-            <button class="qbtn" onclick="chQty(${idx},1)">+</button>
-          </div>
-          <div class="li-sub mono">${money(it.price*it.qty)}</div>
-          <button class="li-rm" onclick="rmLine(${idx})">移除</button>
-        </div>
-      </div>`).join('');
   }
   $('tCount').textContent=count;$('tBV').textContent=bv.toLocaleString();$('tGrand').textContent=money(grand);
   $('checkoutBtn').disabled=!cart.items.length;
 }
-function setPrice(i,v){cart.items[i].price=Math.max(0,Number(v)||0);renderCart();}
+// 改單價時只更新數字，不重繪整個清單，避免輸入框失去焦點
+function setPrice(i,v){
+  const it=cart.items[i];if(!it)return;
+  it.price=Math.max(0,Number(v)||0);
+  const el=$('liSub'+i);if(el)el.textContent=money(it.price*it.qty);
+  renderCartTotals();
+}
 function chQty(i,d){cart.items[i].qty+=d;if(cart.items[i].qty<=0)cart.items.splice(i,1);renderCart();}
 function rmLine(i){cart.items.splice(i,1);renderCart();}
 /* ============ confirm helper (replaces window.confirm/prompt for Safari) ============ */
@@ -829,38 +1102,48 @@ function checkout(){
 function openAddProduct(){
   editProdCode=null;
   $('prodModalTitle').textContent='新增產品';
-  $('prodDelBtn').style.display='none';
+  $('prodDelBtn').hidden=true;
   $('epCode').value='';$('epCode').disabled=false;
   $('epName').value='';$('epBV').value='';$('epCost').value='';$('epRetail').value='';
-  $('epCat').innerHTML=S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const defCat=activeCat!=='all'?activeCat:'';
+  $('epCat').innerHTML=S.cats.map(c=>`<option value="${c.id}" ${c.id===defCat?'selected':''}>${esc(c.name)}</option>`).join('');
+  updateMarginHint();
   openMask('prodMask');setTimeout(()=>$('epCode').focus(),100);
 }
 function editProduct(code){
   const p=S.products.find(p=>p.code===code);if(!p)return;editProdCode=code;
   $('prodModalTitle').textContent='編輯產品';
-  $('prodDelBtn').style.display='inline-block';
+  $('prodDelBtn').hidden=false;
   $('epCode').value=p.code;$('epCode').disabled=false;
   $('epName').value=p.name;$('epBV').value=p.bv;$('epCost').value=p.cost;$('epRetail').value=p.retail;
   $('epCat').innerHTML=S.cats.map(c=>`<option value="${c.id}" ${c.id===p.cat?'selected':''}>${esc(c.name)}</option>`).join('');
+  updateMarginHint();
   openMask('prodMask');
+}
+function updateMarginHint(){
+  const cost=Number($('epCost').value)||0, retail=Number($('epRetail').value)||0, el=$('epMargin');
+  if(!retail){el.hidden=true;return;}
+  const m=retail-cost;
+  el.hidden=false;el.classList.toggle('neg',m<0);
+  el.innerHTML=`<span>每件毛利</span><span class="mono">${money(m)} · ${(m/retail*100).toFixed(1)}%</span>`;
 }
 function saveProduct(){
   const name=$('epName').value.trim();
-  if(!name){toast('請輸入品名');return;}
+  if(!name){toast('請輸入品名');$('epName').focus();return;}
   if(editProdCode){
     // edit mode
     const p=S.products.find(p=>p.code===editProdCode);if(!p)return;
     const newCode=$('epCode').value.trim();
-    if(!newCode){toast('請輸入產品代號');return;}
-    if(newCode!==editProdCode && S.products.find(x=>x.code===newCode)){toast('代號已存在，請換一個');return;}
+    if(!newCode){toast('請輸入產品代號');$('epCode').focus();return;}
+    if(newCode!==editProdCode && S.products.find(x=>x.code===newCode)){toast('代號已存在，請換一個');$('epCode').focus();return;}
     p.code=newCode;p.name=name;p.cat=$('epCat').value;
     p.bv=Number($('epBV').value)||0;p.cost=Number($('epCost').value)||0;p.retail=Number($('epRetail').value)||0;
     save();closeMask('prodMask');renderChips();renderGrid();toast('已更新產品');
   } else {
     // add mode
     const code=$('epCode').value.trim();
-    if(!code){toast('請輸入產品代號');return;}
-    if(S.products.find(p=>p.code===code)){toast('代號已存在，請換一個');return;}
+    if(!code){toast('請輸入產品代號');$('epCode').focus();return;}
+    if(S.products.find(p=>p.code===code)){toast('代號已存在，請換一個');$('epCode').focus();return;}
     S.products.push({
       code,name,cat:$('epCat').value,
       bv:Number($('epBV').value)||0,
@@ -872,7 +1155,7 @@ function saveProduct(){
 }
 function deleteProduct(){
   showConfirm('確定刪除此產品？','此操作無法復原','刪除',()=>{
-    S.products=S.products.filter(p=>p.code!==editProdCode);save();closeMask('prodMask');renderGrid();toast('已刪除產品');
+    S.products=S.products.filter(p=>p.code!==editProdCode);save();closeMask('prodMask');renderChips();renderGrid();toast('已刪除產品');
   });
 }
 
@@ -890,17 +1173,23 @@ function openMemberModal(id){
 function renderMembers(){
   fillMemberSelects();
   $('memCount').textContent='共 '+S.members.length+' 位';
-  if(!S.members.length){$('memBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">尚無會員，點右上角「＋ 新增會員」</td></tr>';return;}
-  $('memBody').innerHTML=S.members.map(m=>{
+  const raw=($('memSearch').value||'').trim(), q=raw.toLowerCase();
+  const list=S.members.filter(m=>!q||[m.name,m.phone,m.note].some(v=>(v||'').toLowerCase().includes(q)));
+  if(!list.length){
+    $('memBody').innerHTML=`<tr><td colspan="6" class="td-empty">${S.members.length?`找不到符合「${esc(raw)}」的會員`:'尚無會員，點右上角「新增會員」開始建立'}</td></tr>`;
+    return;
+  }
+  $('memBody').innerHTML=list.map(m=>{
     const ts=S.txns.filter(t=>t.memberId===m.id);
     const tot=ts.reduce((s,t)=>s+t.total,0);
+    const initial=[...(m.name||'').trim()][0]||'?';
     return `<tr>
-      <td><b>${esc(m.name)}</b></td>
-      <td class="mono">${esc(m.phone||'—')}</td>
-      <td style="max-width:160px;color:var(--muted);font-size:13px">${esc(m.note||'—')}</td>
-      <td class="mono">${ts.length}</td>
-      <td class="mono">${money(tot)}</td>
-      <td style="text-align:right;white-space:nowrap">
+      <td><div class="mem-name"><span class="avatar">${esc(initial)}</span>${esc(m.name)}</div></td>
+      <td class="mono nowrap">${esc(m.phone||'—')}</td>
+      <td class="muted-cell">${esc(m.note||'—')}</td>
+      <td class="mono ta-r">${ts.length}</td>
+      <td class="mono ta-r"><b>${money(tot)}</b></td>
+      <td class="row-actions">
         <button class="mini" onclick="viewMemberTxns('${m.id}')">消費</button>
         <button class="mini gray" onclick="openMemberModal('${m.id}')">編輯</button>
         <button class="mini red" onclick="delMember('${m.id}')">刪除</button>
@@ -908,11 +1197,15 @@ function renderMembers(){
   }).join('');
 }
 function saveMember(){
-  const name=$('mName').value.trim();if(!name){toast('請輸入姓名');return;}
+  const name=$('mName').value.trim();if(!name){toast('請輸入姓名');$('mName').focus();return;}
   const id=$('mEditId').value;
+  let newId=null;
   if(id){const m=S.members.find(x=>x.id===id);m.name=name;m.phone=$('mPhone').value.trim();m.note=$('mNote').value.trim();}
-  else S.members.push({id:uid(),name,phone:$('mPhone').value.trim(),note:$('mNote').value.trim(),created:new Date().toISOString()});
-  save();closeMask('memberMask');renderMembers();toast(id?'已更新會員':'已新增會員：'+name);
+  else S.members.push({id:newId=uid(),name,phone:$('mPhone').value.trim(),note:$('mNote').value.trim(),created:new Date().toISOString()});
+  save();closeMask('memberMask');renderMembers();
+  // 從購物車新增的會員，直接幫忙選好
+  if(newId&&$('cartDrawer').classList.contains('open'))$('cartMember').value=newId;
+  toast(id?'已更新會員':'已新增會員：'+name);
 }
 function delMember(id){
   showConfirm('確定刪除此會員？','消費記錄會保留，會員欄改為散客','刪除',()=>{
@@ -922,11 +1215,14 @@ function delMember(id){
   });
 }
 function fillMemberSelects(){
-  const opt='<option value="">— 散客 —</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}${m.phone?' · '+esc(m.phone):''}</option>`).join('');
-  $('cartMember').innerHTML=opt;
+  // 重繪選單時保留目前選取（雲端同步回來時不會把購物車的顧客洗掉）
+  const curCart=$('cartMember').value, curF=$('fMember').value;
+  $('cartMember').innerHTML='<option value="">— 散客 —</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}${m.phone?' · '+esc(m.phone):''}</option>`).join('');
   $('fMember').innerHTML='<option value="">全部會員</option>'+S.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  if(S.members.some(m=>m.id===curCart))$('cartMember').value=curCart;
+  if(S.members.some(m=>m.id===curF))$('fMember').value=curF;
 }
-function viewMemberTxns(id){$('fMember').value=id;go('records');renderRecords();}
+function viewMemberTxns(id){go('records');$('fMember').value=id;renderRecords();}
 
 /* ============ categories ============ */
 
@@ -935,20 +1231,20 @@ function renderCats(){
   $('catList').innerHTML=S.cats.map((c,i)=>`
     <li class="cat-item" data-id="${c.id}">
       <div class="cat-order">
-        <button class="ord-btn" onclick="moveCat(${i},-1)" ${i===0?'disabled':''} title="往上">
+        <button class="ord-btn" onclick="moveCat(${i},-1)" ${i===0?'disabled':''} title="往上" aria-label="往上移">
           <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
         </button>
-        <button class="ord-btn" onclick="moveCat(${i},1)" ${i===S.cats.length-1?'disabled':''} title="往下">
+        <button class="ord-btn" onclick="moveCat(${i},1)" ${i===S.cats.length-1?'disabled':''} title="往下" aria-label="往下移">
           <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
       </div>
-      <input value="${esc(c.name)}" onchange="renameCat('${c.id}',this.value)">
+      <input value="${esc(c.name)}" onchange="renameCat('${c.id}',this.value)" aria-label="分類名稱">
       <span class="cat-count">${counts[c.id]||0} 項</span>
-      <button class="mini red" onclick="delCat('${c.id}')">刪除</button>
+      <button class="mini red cat-del" onclick="delCat('${c.id}')" title="刪除分類" aria-label="刪除分類 ${esc(c.name)}"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
     </li>`).join('');
   const cur=$('catFilter').value;
   $('catFilter').innerHTML='<option value="all">全部產品</option>'+S.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  $('catFilter').value=cur;
+  $('catFilter').value=S.cats.some(c=>c.id===cur)?cur:'all';
   renderProdCatList();
 }
 function moveCat(i,dir){
@@ -961,13 +1257,13 @@ function renderProdCatList(){
   const cf=$('catFilter').value;
   const q=($('catProdSearch').value||'').trim().toLowerCase();
   const list=S.products.filter(p=>(cf==='all'||p.cat===cf)&&(!q||p.name.toLowerCase().includes(q)||p.code.toLowerCase().includes(q)));
-  if(!list.length){$('prodCatBody').innerHTML=`<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:24px">無符合產品</td></tr>`;return;}
+  if(!list.length){$('prodCatBody').innerHTML=`<tr><td colspan="3" class="td-empty">無符合產品</td></tr>`;return;}
   $('prodCatBody').innerHTML=list.map(p=>`
     <tr>
-      <td style="font-size:13px;font-weight:500;max-width:240px">${esc(p.name)}</td>
-      <td class="mono" style="font-size:11px;color:var(--accent);white-space:nowrap">${esc(p.code)}</td>
+      <td style="font-size:13.5px;font-weight:500;max-width:260px">${esc(p.name)}</td>
+      <td class="mono nowrap" style="font-size:12px;color:var(--muted)">${esc(p.code)}</td>
       <td>
-        <select onchange="changeProdCat('${p.code}',this.value)" style="width:100%;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:#faf8f2;font-size:13px">
+        <select class="input sm" style="width:100%" onchange="changeProdCat('${p.code}',this.value)" aria-label="所屬分類">
           ${S.cats.map(c=>`<option value="${c.id}" ${c.id===p.cat?'selected':''}>${esc(c.name)}</option>`).join('')}
         </select>
       </td>
@@ -980,9 +1276,9 @@ function changeProdCat(code,catId){
   $('catList').querySelectorAll('.cat-item').forEach(li=>{
     const sp=li.querySelector('.cat-count');if(sp)sp.textContent=(counts[li.dataset.id]||0)+' 項';
   });
-  renderGrid();
+  renderChips();renderGrid();toast('已移到「'+catName(catId)+'」');
 }
-function renameCat(id,v){const c=S.cats.find(c=>c.id===id);if(c){c.name=v.trim()||c.name;save();renderChips();}}
+function renameCat(id,v){const c=S.cats.find(c=>c.id===id);if(c){c.name=v.trim()||c.name;save();renderChips();toast('已更新分類名稱');}}
 function openAddCatModal(){
   $('newCatName').value='';
   openMask('addCatMask');
@@ -1002,16 +1298,34 @@ function delCat(id){
     S.products.forEach(p=>{if(p.cat===id)p.cat='__none';});
     S.cats=S.cats.filter(c=>c.id!==id);
     if(cnt>0&&!S.cats.find(c=>c.id==='__none'))S.cats.push({id:'__none',name:'未分類'});
+    if(activeCat===id)activeCat='all';
     save();renderCats();renderChips();renderGrid();
   });
 }
 
 /* ============ records ============ */
+let recRange='all';
+function rangeFor(r){
+  const n=new Date(), t=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  if(r==='today')return [ymd(t),ymd(t)];
+  if(r==='week'){const s=new Date(t);s.setDate(t.getDate()-((t.getDay()+6)%7));return [ymd(s),ymd(t)];}
+  if(r==='month')return [ymd(new Date(t.getFullYear(),t.getMonth(),1)),ymd(t)];
+  if(r==='last')return [ymd(new Date(t.getFullYear(),t.getMonth()-1,1)),ymd(new Date(t.getFullYear(),t.getMonth(),0))];
+  return ['',''];
+}
+function setRange(r){recRange=r;const [f,to]=rangeFor(r);$('fFrom').value=f;$('fTo').value=to;renderRecords();}
+function updateRangeSeg(){
+  const f=$('fFrom').value, to=$('fTo').value, match=r=>{const [a,b]=rangeFor(r);return a===f&&b===to;};
+  const hit=match(recRange)?recRange:(['today','week','month','last','all'].find(match)||'');
+  document.querySelectorAll('#rangeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.r===hit));
+}
+function clearRecFilters(){$('fMember').value='';setRange('all');}
 function renderRecords(){
+  updateRangeSeg();
   const mid=$('fMember').value, from=$('fFrom').value, to=$('fTo').value;
   let list=S.txns.filter(t=>{
     if(mid&&t.memberId!==mid)return false;
-    const d=t.date.slice(0,10);
+    const d=localDay(t.date);
     if(from&&d<from)return false;
     if(to&&d>to)return false;
     return true;
@@ -1029,16 +1343,15 @@ function renderRecords(){
     memberTotals[key].total+=t.total;
     memberTotals[key].count++;
   });
-  const medals=['🥇','🥈','🥉'];
   const top3=Object.values(memberTotals).sort((a,b)=>b.total-a.total).slice(0,3);
   const topRows=top3.map((m,i)=>`
     <tr>
-      <td style="font-size:20px;text-align:center;width:48px">${medals[i]}</td>
+      <td><span class="rank r${i+1}">${i+1}</span></td>
       <td><b>${esc(m.name)}</b></td>
-      <td class="mono" style="text-align:right">${m.count} 筆</td>
-      <td class="mono" style="text-align:right;font-weight:700;color:var(--primary)">${money(m.total)}</td>
+      <td class="mono ta-r">${m.count} 筆</td>
+      <td class="mono ta-r" style="font-weight:700;color:var(--primary-ink)">${money(m.total)}</td>
     </tr>`).join('');
-  $('topMembersTable').innerHTML=topRows||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">無資料</td></tr>';
+  $('topMembersTable').innerHTML=topRows||'<tr><td colspan="4" class="td-empty">無資料</td></tr>';
 
   // 分類利潤分析
   let totalProfit=0;
@@ -1056,38 +1369,37 @@ function renderRecords(){
 
   const avgOrder=list.length>0?Math.round(rev/list.length):0;
   $('statGrid').innerHTML=`
+    <div class="stat hl"><div class="k">總營業額</div><div class="v mono">${money(rev)}</div></div>
+    <div class="stat good"><div class="k">實際利潤</div><div class="v mono">${money(totalProfit)}</div><div class="s">利潤率 ${profitRate}%</div></div>
     <div class="stat"><div class="k">交易筆數</div><div class="v mono">${list.length}</div></div>
-    <div class="stat"><div class="k">總營業額</div><div class="v mono">${money(rev)}</div></div>
     <div class="stat"><div class="k">平均客單價</div><div class="v mono">${money(avgOrder)}</div></div>
     <div class="stat"><div class="k">總 BV</div><div class="v mono">${bv.toLocaleString()}</div></div>
-    <div class="stat"><div class="k">售出件數</div><div class="v mono">${qty}</div></div>
-    <div class="stat" style="border-color:#c8dff8"><div class="k" style="color:#1a6abf">實際利潤</div><div class="v mono" style="color:#1a6abf">${money(totalProfit)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">利潤率 ${profitRate}%</div></div>`;
+    <div class="stat"><div class="k">售出件數</div><div class="v mono">${qty}</div></div>`;
 
   const catRows=Object.entries(catSpread).sort((a,b)=>b[1].profit-a[1].profit).map(([id,v])=>`
     <tr>
       <td style="font-weight:600">${esc(catName(id))}</td>
-      <td class="mono" style="text-align:right">${v.qty}</td>
-      <td class="mono" style="text-align:right;color:#1a6abf">${money(v.profit)}</td>
+      <td class="mono ta-r">${v.qty}</td>
+      <td class="mono ta-r profit">${money(v.profit)}</td>
     </tr>`).join('');
-  $('spreadTable').innerHTML=catRows||'<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:16px">無資料</td></tr>';
+  $('spreadTable').innerHTML=catRows||'<tr><td colspan="3" class="td-empty">無資料</td></tr>';
 
-  if(!list.length){$('recBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">查無消費記錄</td></tr>';return;}
+  $('recHint').textContent=list.length?'共 '+list.length+' 筆 · 點選可查看收據':'';
+  if(!list.length){$('recBody').innerHTML='<tr><td colspan="8" class="td-empty">這段期間沒有消費記錄</td></tr>';return;}
   $('recBody').innerHTML=list.map(t=>{
-    const d=new Date(t.date);
-    const ds=d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     const first=t.items[0]?t.items[0].name:'';
     const more=t.items.length>1?' 等 '+t.items.length+' 項':'';
     let txnProfit=0;
     t.items.forEach(i=>{const p=S.products.find(x=>x.code===i.code);if(p)txnProfit+=(i.price-p.cost)*i.qty;});
     return `<tr class="clk" onclick="openTxnById('${t.id}')">
-      <td class="mono" style="white-space:nowrap">${ds}</td>
-      <td>${esc(t.memberName)}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(first)}${more}</td>
-      <td class="mono">${t.items.reduce((a,i)=>a+i.qty,0)}</td>
-      <td class="mono">${t.bv}</td>
-      <td class="mono"><b>${money(t.total)}</b></td>
-      <td class="mono" style="color:#1a6abf">${money(txnProfit)}</td>
-      <td style="text-align:right"><span class="tag">明細</span></td></tr>`;
+      <td class="mono nowrap">${fmtDT(new Date(t.date))}</td>
+      <td class="nowrap">${esc(t.memberName)}</td>
+      <td class="ellipsis">${esc(first)}${more}</td>
+      <td class="mono ta-r">${t.items.reduce((a,i)=>a+i.qty,0)}</td>
+      <td class="mono ta-r">${t.bv}</td>
+      <td class="mono ta-r"><b>${money(t.total)}</b></td>
+      <td class="mono ta-r profit">${money(txnProfit)}</td>
+      <td class="ta-r"><span class="tag">明細</span></td></tr>`;
   }).join('');
 }
 
@@ -1096,18 +1408,17 @@ function openTxnById(id){const t=S.txns.find(x=>x.id===id);if(t)openTxn(t,true);
 function openTxn(t,allowDelete){
   curTxn=t;
   $('recModalTitle').textContent='消費明細 · '+t.memberName;
-  $('recDelBtn').style.display=allowDelete?'inline-block':'none';
+  $('recDelBtn').hidden=!allowDelete;
   hideDelConfirm();
   $('receiptHost').innerHTML=buildReceiptHTML(t);
   openMask('recMask');
 }
-function showDelConfirm(){$('recFootNormal').style.display='none';$('recFootConfirm').style.display='flex';}
-function hideDelConfirm(){$('recFootNormal').style.display='flex';$('recFootConfirm').style.display='none';}
+function showDelConfirm(){$('recFootNormal').hidden=true;$('recFootConfirm').hidden=false;}
+function hideDelConfirm(){$('recFootNormal').hidden=false;$('recFootConfirm').hidden=true;}
 function buildReceiptHTML(t){
-  const d=new Date(t.date);
-  const ds=d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  const logo=`<img src="${S.settings.logo||'logo.jpeg'}">`;
-  const rows=t.items.map(i=>`<tr><td>${esc(i.name)}<div style="color:#b48a3d;font-size:10px" class="mono">${esc(i.code)}</div></td>
+  const ds=fmtDT(new Date(t.date));
+  const logo=`<img src="${S.settings.logo||'logo.jpeg'}" alt="">`;
+  const rows=t.items.map(i=>`<tr><td>${esc(i.name)}<div class="rc-code mono">${esc(i.code)}</div></td>
     <td class="mono" style="text-align:center">${i.qty}</td>
     <td class="mono" style="text-align:right">${money(i.price)}</td>
     <td class="mono" style="text-align:right">${money(i.price*i.qty)}</td></tr>`).join('');
@@ -1121,7 +1432,7 @@ function buildReceiptHTML(t){
     <div class="rc-tot">
       <div class="r"><span>總件數</span><span class="mono">${t.items.reduce((a,i)=>a+i.qty,0)}</span></div>
       <div class="r"><span>總 BV</span><span class="mono">${t.bv}</span></div>
-      ${t.discount?`<div class="r" style="color:#c0492f"><span>${t.discount.type==='pct'?`折扣 ${t.discount.value}%`:'折扣'}</span><span class="mono">-${money(t.discount.amount)}</span></div>`:''}
+      ${t.discount?`<div class="r disc"><span>${t.discount.type==='pct'?`折扣 ${t.discount.value}%`:'折扣'}</span><span class="mono">-${money(t.discount.amount)}</span></div>`:''}
       <div class="g"><span>合計</span><span class="mono">${money(t.total)}</span></div>
     </div>
     ${t.note?'<div class="rc-note">備註：'+esc(t.note)+'</div>':''}
@@ -1134,7 +1445,7 @@ function exportReceipt(){
   toast('產生圖片中…');
   html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true}).then(canvas=>{
     const t=curTxn;const d=new Date(t.date);
-    const fn='消費明細_'+t.memberName+'_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'+t.id.slice(-4)+'.jpg';
+    const fn='消費明細_'+t.memberName+'_'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+t.id.slice(-4)+'.jpg';
     canvas.toBlob(blob=>{
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a');
@@ -1157,15 +1468,20 @@ function deleteCurrentTxn(){
 }
 
 /* ============ settings ============ */
+function setImgPrev(kind,src,state){
+  const fav=kind==='fav';
+  $(fav?'favPreview':'logoPreview').innerHTML=`<img class="img-prev${fav?' fav':''}" src="${src}" alt="">`;
+  $(fav?'favState':'logoState').textContent=state;
+}
 function openSettings(){$('setStore').value=S.settings.store;$('setTag').value=S.settings.tag;
   pendingLogo=null;pendingFavicon=null;$('setLogo').value='';$('setFavicon').value='';
-  $('logoPreview').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`+(S.settings.logo?'':'<span style="color:var(--muted);font-size:12px;margin-left:8px">預設圖片</span>');
-  $('favPreview').innerHTML=`<img src="${S.settings.favicon||S.settings.logo||'logo.jpeg'}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`+(S.settings.favicon?'':'<span style="color:var(--muted);font-size:12px;margin-left:8px">預設圖片</span>');
+  setImgPrev('logo',S.settings.logo||'logo.jpeg',(S.settings.logo?'自訂圖片':'預設圖片')+' · 顯示於收據與側欄');
+  setImgPrev('fav',S.settings.favicon||S.settings.logo||'logo.jpeg',(S.settings.favicon?'自訂圖片':'預設圖片')+' · 顯示於瀏覽器分頁');
   openMask('setMask');}
 let pendingLogo=null;
 function onLogoPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{pendingLogo=r.result;$('logoPreview').innerHTML=`<img src="${r.result}" style="height:54px;border-radius:10px;border:1px solid var(--line)">`;};r.readAsDataURL(f);}
-function clearLogo(){pendingLogo='';$('logoPreview').innerHTML='<img src="logo.jpeg" style="height:54px;border-radius:10px;border:1px solid var(--line)"><span style="color:var(--muted);font-size:12px;margin-left:8px">已還原預設圖片</span>';}
+  r.onload=()=>{pendingLogo=r.result;setImgPrev('logo',r.result,'已選擇新圖片，按「儲存設定」後生效');};r.readAsDataURL(f);}
+function clearLogo(){pendingLogo='';setImgPrev('logo','logo.jpeg','將還原預設圖片，按「儲存設定」後生效');}
 let pendingFavicon=null;
 function onFaviconPick(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{const img=new Image();
@@ -1173,11 +1489,11 @@ function onFaviconPick(e){const f=e.target.files[0];if(!f)return;const r=new Fil
       const c=document.createElement('canvas');c.width=64;c.height=64;
       c.getContext('2d').drawImage(img,0,0,64,64);
       pendingFavicon=c.toDataURL('image/png');
-      $('favPreview').innerHTML=`<img src="${pendingFavicon}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)">`;
+      setImgPrev('fav',pendingFavicon,'已選擇新圖片，按「儲存設定」後生效');
     };
     img.onerror=()=>toast('圖片無法讀取');
     img.src=r.result;};r.readAsDataURL(f);}
-function clearFavicon(){pendingFavicon='';$('favPreview').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line)"><span style="color:var(--muted);font-size:12px;margin-left:8px">已還原預設圖片</span>`;}
+function clearFavicon(){pendingFavicon='';setImgPrev('fav',S.settings.logo||'logo.jpeg','將還原預設圖片，按「儲存設定」後生效');}
 function saveSettings(){
   S.settings.store=$('setStore').value.trim()||'美安台灣 POS';
   S.settings.tag=$('setTag').value.trim();
@@ -1187,7 +1503,7 @@ function saveSettings(){
 }
 function applySettings(){
   $('storeTitle').textContent=S.settings.store;
-  $('railLogo').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}">`;
+  $('railLogo').innerHTML=`<img src="${S.settings.logo||'logo.jpeg'}" alt="${esc(S.settings.store)}">`;
   $('faviconLink').href=S.settings.favicon||S.settings.logo||'logo.jpeg';
 }
 
@@ -1196,7 +1512,7 @@ function exportBackup(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download='美安POS備份_'+new Date().toISOString().slice(0,10)+'.json';
+  a.href=url;a.download='美安POS備份_'+ymd(new Date())+'.json';
   a.style.display='none';document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},300);
   toast('已匯出備份');
@@ -1205,7 +1521,7 @@ function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new File
   r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.products||!d.cats)throw 0;
     showConfirm('匯入備份？','將覆蓋目前所有資料，此操作無法復原','確定匯入',()=>{
       S=d;S.settings=Object.assign({store:'美安台灣 POS',tag:'sky',logo:'',favicon:''},S.settings||{});save();
-      applySettings();renderChips();renderGrid();go('records');toast('已匯入備份');
+      applySettings();fillMemberSelects();renderChips();renderGrid();go('records');toast('已匯入備份');
     });
   }catch(err){toast('檔案格式錯誤');}};r.readAsText(f);e.target.value='';}
 
@@ -1213,22 +1529,39 @@ function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new File
 function openMask(id){$(id).classList.add('show');}
 function closeMask(id){$(id).classList.remove('show');}
 document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+
+/* ============ keyboard ============ */
 document.addEventListener('keydown',e=>{
-  if(e.key!=='Escape')return;
-  const open=document.querySelector('.mask.show');
-  if(open){open.classList.remove('show');return;}
-  if(document.getElementById('cartDrawer').classList.contains('open'))closeDrawer();
+  const typing=e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]');
+  if(e.key==='Escape'){
+    const open=document.querySelector('.mask.show');
+    if(open){open.classList.remove('show');return;}
+    if($('cartDrawer').classList.contains('open')){closeDrawer();return;}
+    if(e.target===$('search')&&$('search').value){clearSearch();}
+    return;
+  }
+  // 視窗內按 Enter 直接儲存（避開中文輸入法選字中的 Enter）
+  if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229&&e.target.matches&&e.target.matches('.mask.show input:not([type=file])')){
+    const btn=e.target.closest('.mask').querySelector('[data-submit]');
+    if(btn){e.preventDefault();btn.click();}
+    return;
+  }
+  // 按 / 快速跳到產品搜尋
+  if(e.key==='/'&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!document.querySelector('.mask.show')&&!$('cartDrawer').classList.contains('open')){
+    e.preventDefault();
+    if(!$('view-pos').classList.contains('active'))go('pos');
+    $('search').focus();$('search').select();
+  }
 });
-function updateSearchClear(){$('searchClear').style.display=$('search').value?'block':'none';}
 
 /* ============ clock ============ */
 function tick(){const d=new Date();const wk=['日','一','二','三','四','五','六'][d.getDay()];
-  $('cDate').textContent=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} (${wk})`;
-  $('cTime').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;}
+  $('cDate').textContent=`${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} (${wk})`;
+  $('cTime').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;}
 setInterval(tick,1000);tick();
 
 /* ============ init ============ */
-applySettings();fillMemberSelects();renderChips();renderGrid();renderCart();
+applySettings();fillMemberSelects();renderChips();renderGrid();renderCart();updateSearchClear();
 initCloud();
 </script>
 </body>
